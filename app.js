@@ -38,7 +38,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Routes
-app.use("/api/v1", routes);
+app.use("/api/v1", routes);  
+
+ 
 
 app.get("/", (req, res) => {
   res.status(200).send("ERA Global Backend is Live ! 🎉");
