@@ -1,0 +1,38 @@
+[{
+  "_id": {
+    "$oid": "68833f4136180984541aa7d8"
+  },
+  "fromUserID": {
+    "$oid": "683465aa70ad070a0ef944be"
+  },
+  "toUserID": {
+    "$oid": "683465aa70ad070a0ef944be"
+  },
+  "pinQuantity": 10,
+  "createdAt": {
+    "$date": "2025-07-25T08:24:33.312Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-25T08:24:33.312Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6883ac0336180984541ab8dc"
+  },
+  "fromUserID": {
+    "$oid": "683465aa70ad070a0ef944be"
+  },
+  "toUserID": {
+    "$oid": "683533abfc0f6b4406ecab1c"
+  },
+  "pinQuantity": 5,
+  "createdAt": {
+    "$date": "2025-07-25T16:08:35.250Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-25T16:08:35.250Z"
+  },
+  "__v": 0
+}]
