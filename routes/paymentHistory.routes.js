@@ -34,4 +34,10 @@ paymentHistoryRoute.get(
   PaymentHistory.getDeposit
 );
 
+paymentHistoryRoute.post(
+  "/updatePaymentStatus/:id",
+  authenticateToken,
+  PaymentHistory.updatePaymentStatus
+);
+
 module.exports = paymentHistoryRoute;

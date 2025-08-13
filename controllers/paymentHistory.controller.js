@@ -128,10 +128,52 @@ const getDeposit = async (req, res) => {
   }
 };
 
+// Allowed statuses
+const ALLOWED_STATUSES = ["Initial", "Verified", "Rejected"];
+const updatePaymentStatus = async (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+//   console.log(status, id);
+  try {
+    // ✅ 1. Check status is valid
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return res.status(400).json({
+        message: `Invalid status. Allowed: ${ALLOWED_STATUSES.join(", ")}`,
+      });
+    }
+
+    // ✅ 2. Update document
+    const updatedPayment = await PaymentHistoryModel.findByIdAndUpdate(
+      id,
+      { verficationStatus: status },
+      { new: true } // return updated doc
+    );
+
+    // ✅ 3. Check if payment exists
+    if (!updatedPayment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Status updated successfully",
+      payment: updatedPayment,
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Payment status update faild",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addDepositHistory,
   addWithdrawHistory,
   getTransactionsByUser,
   getWithdrawal,
   getDeposit,
+  updatePaymentStatus,
 };
