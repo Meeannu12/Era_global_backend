@@ -179,8 +179,6 @@ const getUsersBySponsorID = async (req, res) => {
 const addWalletAddress = async (req, res) => {
   try {
     const { walletAddress } = req.body;
-    // const user = await User.findOne({ userID: req.userId });
-    // console.log("addWalletAddress", walletAddress, user);
     const updateUser = await User.findOneAndUpdate(
       { userID: req.userId },
       { $set: { walletAddress } },

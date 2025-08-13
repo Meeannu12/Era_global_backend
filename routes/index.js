@@ -5,10 +5,12 @@ const userRouter = require("./user.routes");
 const pinRouter = require("./pin.routes");
 const authRouter = require("./auth.routes");
 const pinHistoryRouter = require("./pinHistory.routes");
+const paymentHistoryRoute = require("./paymentHistory.routes");
 
 router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/pins", pinRouter);
 router.use("/pins-history", pinHistoryRouter);
+router.use("/payment", paymentHistoryRoute);
 
 module.exports = router;
