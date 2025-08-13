@@ -23,4 +23,15 @@ paymentHistoryRoute.get(
   PaymentHistory.getTransactionsByUser
 );
 
+paymentHistoryRoute.get(
+  "/getWithdrawalTransaction",
+  authenticateToken,
+  PaymentHistory.getWithdrawal
+);
+paymentHistoryRoute.get(
+  "/getDepositTransaction",
+  authenticateToken,
+  PaymentHistory.getDeposit
+);
+
 module.exports = paymentHistoryRoute;

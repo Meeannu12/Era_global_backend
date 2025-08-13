@@ -84,8 +84,54 @@ const getTransactionsByUser = async (req, res) => {
   }
 };
 
+const getWithdrawal = async (req, res) => {
+  try {
+    const allTransaction = await PaymentHistoryModel.find({
+      mode: "Withdraw",
+      verficationStatus: "Initial",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Get WithDrawal Transaction",
+      data: allTransaction ? allTransaction : [],
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "failed to Get Withdrawal Transactions",
+      error: error.message,
+    });
+  }
+};
+
+const getDeposit = async (req, res) => {
+  try {
+    const allTransaction = await PaymentHistoryModel.find({
+      mode: "Deposit",
+      verficationStatus: "Initial",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Get Deposit Transaction",
+      data: allTransaction ? allTransaction : [],
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "failed to Get Deposit Transactions",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addDepositHistory,
   addWithdrawHistory,
   getTransactionsByUser,
+  getWithdrawal,
+  getDeposit,
 };
