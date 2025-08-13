@@ -35,4 +35,10 @@ router.get(
   authenticateToken,
   userController.getAllUserSponsorBySponsorID
 );
+
+router.post(
+  "/addWalletAddress",
+  authenticateToken,
+  userController.addWalletAddress
+);
 module.exports = router;

@@ -175,6 +175,32 @@ const getUsersBySponsorID = async (req, res) => {
   }
 };
 
+// add wallet address using this api
+const addWalletAddress = async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+    // const user = await User.findOne({ userID: req.userId });
+    // console.log("addWalletAddress", walletAddress, user);
+    const updateUser = await User.findOneAndUpdate(
+      { userID: req.userId },
+      { $set: { walletAddress } },
+      { new: true }
+    );
+    res.status(201).json({
+      success: true,
+      message: "user Wallet Address Update",
+      user: updateUser,
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Get user failed",
+      error: error.message,
+    });
+  }
+};
+
 async function getReferralCountByLevel(req, res) {
   try {
     const sponsorID = req.params.sponsorID;
@@ -238,4 +264,5 @@ module.exports = {
   editUserProfile,
   changePassword,
   forgetPassword,
+  addWalletAddress,
 };

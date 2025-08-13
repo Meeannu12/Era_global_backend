@@ -60,6 +60,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    walletAddress: String,
     isAdmin: {
       type: Boolean,
       default: false,
