@@ -8,6 +8,7 @@ const paymentHistorySchema = new mongoose.Schema(
       required: true,
     },
     userID: String,
+    sponsorID: String,
     mode: {
       type: String,
       enum: ["Deposit", "Withdraw"], // ✅ only these two values allowed

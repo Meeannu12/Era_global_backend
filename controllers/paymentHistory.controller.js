@@ -3,7 +3,7 @@ const User = require("../models/user.model");
 
 const addDepositHistory = async (req, res) => {
   const userID = req.userId;
-  const { senderWallet, amount, receiveWallet } = req.body;
+  const { senderWallet, amount, receiveWallet, sponsorID } = req.body;
   //   console.log("addDepositHistory", senderWallet, amount, receiveWallet);
   try {
     const user = await User.findOne({ userID });
@@ -11,6 +11,7 @@ const addDepositHistory = async (req, res) => {
     const addDeposit = new PaymentHistoryModel({
       user: user._id,
       userID: user.userID,
+      sponsorID,
       mode: "Deposit",
       senderWallet,
       receiveWallet,
@@ -35,7 +36,7 @@ const addDepositHistory = async (req, res) => {
 
 const addWithdrawHistory = async (req, res) => {
   const userID = req.userId;
-  const { senderWallet, amount, receiveWallet } = req.body;
+  const { senderWallet, amount, receiveWallet, sponsorID } = req.body;
   //   console.log("addDepositHistory", senderWallet, amount, receiveWallet);
   try {
     const user = await User.findOne({ userID });
@@ -44,6 +45,7 @@ const addWithdrawHistory = async (req, res) => {
       user: user._id,
       userID: user.userID,
       mode: "Withdraw",
+      sponsorID,
       senderWallet,
       receiveWallet,
       amount,
@@ -133,7 +135,7 @@ const ALLOWED_STATUSES = ["Initial", "Verified", "Rejected"];
 const updatePaymentStatus = async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
-//   console.log(status, id);
+  //   console.log(status, id);
   try {
     // ✅ 1. Check status is valid
     if (!ALLOWED_STATUSES.includes(status)) {
