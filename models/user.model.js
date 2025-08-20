@@ -52,10 +52,19 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    wallet: {
+    walletDeposit: {
       type: Number,
       default: 0,
     },
+    walletSelfEarn: {
+      type: Number,
+      default: 0,
+    },
+    walletTeamEarn: {
+      type: Number,
+      default: 0,
+    },
+    lastCreditedDate: { type: Date },
     level: {
       type: Number,
       default: 0,
