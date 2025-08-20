@@ -1,3 +1,4 @@
+const { findById } = require("../models/level.model");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
 const User = require("../models/user.model");
 
@@ -70,7 +71,10 @@ const addWithdrawHistory = async (req, res) => {
 const getTransactionsByUser = async (req, res) => {
   const userID = req.userId;
   try {
-    const paymentHistory = await PaymentHistoryModel.find({ userID });
+    const paymentHistory = await PaymentHistoryModel.find({ userID })
+    // .sort({
+    //   createdAt: -1,
+    // });
     res.status(200).json({
       success: true,
       message: "Amount Withdraw Request Send",
@@ -90,7 +94,7 @@ const getWithdrawal = async (req, res) => {
   try {
     const allTransaction = await PaymentHistoryModel.find({
       mode: "Withdraw",
-      verficationStatus: "Initial",
+      verficationStatus: "Unverified",
     });
 
     res.status(200).json({
@@ -112,7 +116,7 @@ const getDeposit = async (req, res) => {
   try {
     const allTransaction = await PaymentHistoryModel.find({
       mode: "Deposit",
-      verficationStatus: "Initial",
+      verficationStatus: "Unverified",
     });
 
     res.status(200).json({
@@ -131,9 +135,9 @@ const getDeposit = async (req, res) => {
 };
 
 // Allowed statuses
-const ALLOWED_STATUSES = ["Initial", "Verified", "Rejected"];
+const ALLOWED_STATUSES = ["Unverified", "Verified", "Rejected"];
 const updatePaymentStatus = async (req, res) => {
-  const { status } = req.body;
+  const { status, method } = req.body;
   const { id } = req.params;
   //   console.log(status, id);
   try {
@@ -142,6 +146,41 @@ const updatePaymentStatus = async (req, res) => {
       return res.status(400).json({
         message: `Invalid status. Allowed: ${ALLOWED_STATUSES.join(", ")}`,
       });
+    }
+
+    const updatePayment = await PaymentHistoryModel.findById(id);
+    if (!updatePayment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Payment Status Not Found" });
+    }
+
+    if (status === "Verified") {
+      if (method.toLowerCase() === "deposit") {
+        await User.findOneAndUpdate(
+          { sponsorID: updatePayment.sponsorID },
+          { $inc: { walletDeposit: updatePayment.amount } },
+          { new: true }
+        );
+      }
+      if (method.toLowerCase() === "withdraw") {
+        const updatedUser = await User.findOneAndUpdate(
+          {
+            sponsorID: updatePayment.sponsorID,
+            walletTeamEarn: { $gte: updatePayment.amount },
+          },
+          { $inc: { walletTeamEarn: -updatePayment.amount } },
+          { new: true }
+        );
+
+        if (!updatedUser) {
+          return res.status(422).json({
+            success: false,
+            message:
+              "Insufficient balance in walletTeamEarn or user not found.",
+          });
+        }
+      }
     }
 
     // ✅ 2. Update document

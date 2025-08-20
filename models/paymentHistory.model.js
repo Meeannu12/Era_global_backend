@@ -31,8 +31,8 @@ const paymentHistorySchema = new mongoose.Schema(
     },
     verficationStatus: {
       type: String,
-      enum: ["Initial", "Verified", "Rejected"], // ✅ only these three values allowed
-      default: "Initial",
+      enum: ["Unverified", "Verified", "Rejected"], // ✅ only these three values allowed
+      default: "Unverified",
     },
     recordStatus: {
       type: Boolean,
