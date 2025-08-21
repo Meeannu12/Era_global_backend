@@ -13,7 +13,8 @@ const commissionSchema = new mongoose.Schema(
     fromUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default:null
+      // required: true,
     }, // referral (source)
     level: { type: Number, required: true }, // 1..10
     amount: { type: Number, required: true },

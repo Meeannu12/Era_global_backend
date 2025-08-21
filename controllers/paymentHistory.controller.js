@@ -1,5 +1,6 @@
 const { findById } = require("../models/level.model");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
+const Pin = require("../models/pin.model");
 const User = require("../models/user.model");
 
 const addDepositHistory = async (req, res) => {
@@ -71,7 +72,7 @@ const addWithdrawHistory = async (req, res) => {
 const getTransactionsByUser = async (req, res) => {
   const userID = req.userId;
   try {
-    const paymentHistory = await PaymentHistoryModel.find({ userID })
+    const paymentHistory = await PaymentHistoryModel.find({ userID });
     // .sort({
     //   createdAt: -1,
     // });
@@ -95,7 +96,7 @@ const getWithdrawal = async (req, res) => {
     const allTransaction = await PaymentHistoryModel.find({
       mode: "Withdraw",
       verficationStatus: "Unverified",
-    });
+    }).populate("user");
 
     res.status(200).json({
       success: true,
@@ -117,7 +118,7 @@ const getDeposit = async (req, res) => {
     const allTransaction = await PaymentHistoryModel.find({
       mode: "Deposit",
       verficationStatus: "Unverified",
-    });
+    }).populate("user");
 
     res.status(200).json({
       success: true,
@@ -157,11 +158,17 @@ const updatePaymentStatus = async (req, res) => {
 
     if (status === "Verified") {
       if (method.toLowerCase() === "deposit") {
+        const getPin = await Pin.findOne({ used: false });
         await User.findOneAndUpdate(
           { sponsorID: updatePayment.sponsorID },
-          { $inc: { walletDeposit: updatePayment.amount } },
+          {
+            $inc: { walletDeposit: updatePayment.amount },
+            $set: { pin: getPin.pin, isActive: true },
+          },
           { new: true }
         );
+        getPin.used = true;
+        getPin.save();
       }
       if (method.toLowerCase() === "withdraw") {
         const updatedUser = await User.findOneAndUpdate(

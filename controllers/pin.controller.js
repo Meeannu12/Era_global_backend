@@ -259,6 +259,8 @@ const activatePin = async (req, res) => {
     }
 
     user.pin = pin;
+    user.walletDeposit = 5;
+    user.isActive = true;
     await user.save();
 
     existingPin.used = true;

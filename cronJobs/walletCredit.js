@@ -3,6 +3,7 @@
 // const cron = require("node-cron");
 const { default: nodeCron } = require("node-cron");
 const User = require("../models/user.model");
+const commissionModel = require("../models/commission.model");
 // import mongoose from "mongoose";
 
 // mongoose.connect("mongodb://127.0.0.1:27017/walletDB");
@@ -41,6 +42,15 @@ nodeCron.schedule("0 0 * * *", async () => {
 
       user.walletSelfEarn += amountToAdd;
       user.lastCreditedDate = today;
+
+      if (amountToAdd > 0) {
+        await commissionModel.create({
+          userId: user._id,
+          amount: amountToAdd,
+          level: 0,
+          date: today,
+        });
+      }
 
       await user.save();
 

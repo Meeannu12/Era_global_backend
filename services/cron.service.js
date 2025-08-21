@@ -16,11 +16,5 @@ function startCron() {
   console.log("✅ Cron scheduled: 01:00 Mon–Fri");
 }
 
-// const data = async () => {
-//   const data = await runDailyDistribution(new Date());
-//   console.log("DATA...........", data);
-// };
-
-// data();
 
 module.exports = { startCron };
