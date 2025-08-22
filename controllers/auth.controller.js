@@ -105,12 +105,12 @@ const login = async (req, res) => {
       });
     }
 
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: "Account is deactivated. Please contact support",
-      });
-    }
+    // if (!user.isActive) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "Account is deactivated. Please contact support",
+    //   });
+    // }
 
     const isPasswordValid = await user.comparePassword(password);
 
