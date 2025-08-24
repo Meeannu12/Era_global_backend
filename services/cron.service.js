@@ -1,9 +1,10 @@
 // services/cron.service.js
 const cron = require("node-cron");
-const { runDailyDistribution } = require("./commission.service");
+const { levelTeamIncome } = require("./commission.service");
 // import cron from "node-cron";
 const CommissionModel = require("../models/commission.model");
 const User = require("../models/user.model");
+const selfEarning = require("../cronJobs/walletCredit");
 // import User from "./models/User"; // mongoose model
 
 // helper function - recursive
@@ -103,15 +104,6 @@ async function calculateRoyaltyForAllUsers() {
   console.log("Royalty calculation finished:", new Date());
 }
 
-function startRoyaltyCron() {
-  console.log("royalty cron job run");
-  // Cron job schedule
-  // "0 6 1 * *" => har month ke 1st din, subah 6:00 AM
-  cron.schedule("0 6 1 * *", () => {
-    calculateRoyaltyForAllUsers();
-  });
-}
-
 function startCron() {
   // Every weekday at 01:00
   cron.schedule("0 1 * * 1-5", async () => {
@@ -124,6 +116,31 @@ function startCron() {
     }
   });
   console.log("✅ Cron scheduled: 01:00 Mon–Fri");
+}
+
+//royalty income function here
+function startRoyaltyCron() {
+  console.log("royalty cron job run");
+  // Cron job schedule
+  // "0 6 1 * *" => har month ke 1st din, subah 6:00 AM
+  cron.schedule("0 6 1 * *", async () => {
+    await calculateRoyaltyForAllUsers();
+  });
+}
+
+// level income function here
+function startLevelCron() {
+  cron.schedule("0 1 * * 1-5", async () => {
+    console.log("Running commission job Monday-Friday at 1 AM");
+    await levelTeamIncome();
+  });
+}
+
+// self income function here
+function startSelfCron() {
+  nodeCron.schedule("0 0 * * *", async () => {
+    await selfEarning();
+  });
 }
 
 module.exports = { startCron, startRoyaltyCron };

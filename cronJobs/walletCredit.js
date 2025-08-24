@@ -14,7 +14,7 @@ function isWeekend(date) {
   return day === 0 || day === 6;
 }
 
-nodeCron.schedule("0 0 * * *", async () => {
+async function selfEarning() {
   const today = new Date();
 
   if (isWeekend(today)) {
@@ -24,11 +24,13 @@ nodeCron.schedule("0 0 * * *", async () => {
 
   try {
     const allUsers = await User.find({});
+    const bulkUserOps = [];
+    const bulkCommissionOps = [];
 
     for (const user of allUsers) {
       const maxLimit = user.walletDeposit * 5;
 
-      if (user.walletEarn >= maxLimit) {
+      if (user.walletSelfEarn >= maxLimit) {
         console.log(`${user.username} ka limit reach ho gaya`);
         continue; // skip credit
       }
@@ -40,23 +42,55 @@ nodeCron.schedule("0 0 * * *", async () => {
         amountToAdd = maxLimit - user.walletSelfEarn;
       }
 
-      user.walletSelfEarn += amountToAdd;
-      user.lastCreditedDate = today;
+      // user.walletSelfEarn += amountToAdd;
+      // user.lastCreditedDate = today;
+
+      // if (amountToAdd > 0) {
+      //   await commissionModel.create({
+      //     userId: user._id,
+      //     amount: amountToAdd,
+      //     level: 0,
+      //     date: today,
+      //   });
+      // }
+
+      // await user.save();
 
       if (amountToAdd > 0) {
-        await commissionModel.create({
-          userId: user._id,
-          amount: amountToAdd,
-          level: 0,
-          date: today,
+        bulkCommissionOps.push({
+          insertOne: {
+            document: {
+              userId: user._id,
+              amount: amountToAdd,
+              level: 0,
+              date: today,
+            },
+          },
+        });
+
+        bulkUserOps.push({
+          updateOne: {
+            filter: { _id: user._id },
+            update: {
+              $inc: { walletSelfEarn: amountToAdd },
+              $set: { lastCreditedDate: today },
+            },
+          },
         });
       }
 
-      await user.save();
+      if (bulkUserOps.length > 0) {
+        await User.bulkWrite(bulkUserOps);
+      }
+      if (bulkCommissionOps.length > 0) {
+        await commissionModel.bulkWrite(bulkCommissionOps);
+      }
 
       console.log(`Added ${amountToAdd} to ${user.username}`);
     }
   } catch (err) {
     console.error("Error in cron job:", err);
   }
-});
+}
+
+module.exports = selfEarning;

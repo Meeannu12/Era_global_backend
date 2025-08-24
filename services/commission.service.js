@@ -205,6 +205,7 @@ async function distributeCommission(userID, level = 1, maxLevel = 10) {
 
       commissionRecords.push({
         userId: userID._id,
+        fromUserId: ref._id,
         level: level,
         amount: income,
       });
@@ -218,14 +219,50 @@ async function distributeCommission(userID, level = 1, maxLevel = 10) {
 async function saveAllIncomes() {
   if (commissionRecords.length > 0) {
     console.log(commissionRecords);
-    // await CommissionModel.insertMany(commissionRecords);
+    await Commission.insertMany(commissionRecords);
+    // Reduce to user-wise total
+    const userTotals = Object.values(
+      commissionRecords.reduce((acc, curr) => {
+        if (!acc[curr.userId])
+          acc[curr.userId] = { userId: curr.userId, amount: 0 };
+        acc[curr.userId].amount += curr.amount;
+        return acc;
+      }, {})
+    );
+
+    for (const record of commissionRecords) {
+      await User.findByIdAndUpdate(
+        record.userId,
+        { $inc: { walletTeamEarn: record.amount } },
+        { new: true } // upsert optional, agar user exist nahi to create
+      );
+    }
+    console.log(userTotals);
 
     commissionRecords = []; // reset
   }
 }
 
 // Example main function
-async function main() {
+async function levelTeamIncome() {
+  const now = new Date();
+
+  const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const hour = now.getHours(); // 0-23
+
+  // Check: run only Monday-Friday at 1 AM
+  if (day === 0) {
+    console.log("Today is Sunday, function will not run.");
+    return;
+  }
+  if (day === 6) {
+    console.log("Today is Saturday, function will not run.");
+    return;
+  }
+  if (hour !== 1) {
+    console.log("It is not 1 AM yet, function will not run.");
+    return;
+  }
   // Start commission calculation for all users (or a specific user)
   const users = await User.find(); // all users
   for (const user of users) {
@@ -237,11 +274,12 @@ async function main() {
   console.log("Commission calculation finished!");
 }
 
-main();
+// levelTeamIncome();
 
 module.exports = {
-  startOfDay,
-  isWeekend,
+  // startOfDay,
+  // isWeekend,
   // distributeForReferral,
-  runDailyDistribution,
+  levelTeamIncome,
+  // runDailyDistribution,
 };
