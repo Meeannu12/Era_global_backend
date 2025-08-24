@@ -31,7 +31,7 @@ async function selfEarning() {
       const maxLimit = user.walletDeposit * 5;
 
       if (user.walletSelfEarn >= maxLimit) {
-        console.log(`${user.username} ka limit reach ho gaya`);
+        // console.log(`${user.username} ka limit reach ho gaya`);
         continue; // skip credit
       }
 

@@ -87,9 +87,10 @@ async function calculateIncomes() {
 
     await addRoyaltyCommission.save();
 
-    // console.log(`User: ${user.userName}`);
+    // console.log(`User: ${user.sponsorID}`);
     // console.log(`Direct Income: ${directIncome}`);
     // console.log(`Team Income: ${teamIncome}`);
+    // console.log(`royalty Income : ${royalty}`);
     // console.log("---------------------------");
   }
 }
@@ -104,22 +105,8 @@ async function calculateRoyaltyForAllUsers() {
   console.log("Royalty calculation finished:", new Date());
 }
 
-function startCron() {
-  // Every weekday at 01:00
-  cron.schedule("0 1 * * 1-5", async () => {
-    try {
-      console.log("⏰ Running daily commission distribution...");
-      const res = await runDailyDistribution(new Date());
-      console.log("✅ Commission job result:", res);
-    } catch (e) {
-      console.error("❌ Commission job error:", e.message);
-    }
-  });
-  console.log("✅ Cron scheduled: 01:00 Mon–Fri");
-}
-
 //royalty income function here
-function startRoyaltyCron() {
+async function startRoyaltyCron() {
   console.log("royalty cron job run");
   // Cron job schedule
   // "0 6 1 * *" => har month ke 1st din, subah 6:00 AM
@@ -130,6 +117,7 @@ function startRoyaltyCron() {
 
 // level income function here
 function startLevelCron() {
+  // Every weekday at 01:00
   cron.schedule("0 1 * * 1-5", async () => {
     console.log("Running commission job Monday-Friday at 1 AM");
     await levelTeamIncome();
@@ -138,9 +126,12 @@ function startLevelCron() {
 
 // self income function here
 function startSelfCron() {
-  nodeCron.schedule("0 0 * * *", async () => {
+  cron.schedule("0 0 * * *", async () => {
     await selfEarning();
   });
 }
 
-module.exports = { startCron, startRoyaltyCron };
+// startLevelCron();
+// startRoyaltyCron()
+
+module.exports = { startRoyaltyCron, startLevelCron, startSelfCron };
