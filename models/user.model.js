@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+     walletReward: {
+      type: Number,
+      default: 0,
+    },
     lastCreditedDate: { type: Date },
     level: {
       type: Number,
