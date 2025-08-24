@@ -127,7 +127,9 @@ async function startLevelCron() {
 
 // self income function here
 function startSelfCron() {
-  cron.schedule("0 0 * * *", async () => {
+  // "0 0 * * 1-5" => every day at 12:00AM
+  // Every weekday at 12:00
+  cron.schedule("0 0 * * 1-5", async () => {
     await selfEarning();
   });
 }
