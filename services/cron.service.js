@@ -108,20 +108,22 @@ async function calculateRoyaltyForAllUsers() {
 
 //royalty income function here
 async function startRoyaltyCron() {
-  console.log("royalty cron job run");
   // Cron job schedule
   // "0 6 1 * *" => har month ke 1st din, subah 6:00 AM
   cron.schedule("0 6 1 * *", async () => {
+    console.log("royalty cron job run");
     await calculateRoyaltyForAllUsers();
+    console.log("royalty cron job run finish");
   });
 }
 
 // level income function here
 async function startLevelCron() {
   // Every weekday at 01:00
+  console.log("Running commission job Monday-Friday at 1 AM");
   cron.schedule("0 1 * * 1-5", async () => {
-    console.log("Running commission job Monday-Friday at 1 AM");
     await levelTeamIncome();
+     console.log("level commission job is finish");
   });
 }
 
@@ -131,18 +133,16 @@ async function startSelfCron() {
   // Every weekday at 12:00
   cron.schedule("0 0 * * 1-5", async () => {
     await selfEarning();
+    console.log("Self Income calculation finish");
   });
-console.log("Self Income calculation finish")
-  
 }
 
 async function startRewardCron() {
   // "0 6 2 * *" => har month ke 2st din, subah 6:00 AM
   cron.schedule("0 6 2 * *", async () => {
     await calculateRewardIncomes();
+    console.log("reward calculation finish");
   });
-
-  console.log("reward calculation finish")
 }
 
 // startLevelCron();
