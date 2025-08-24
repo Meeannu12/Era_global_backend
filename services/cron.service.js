@@ -126,19 +126,23 @@ async function startLevelCron() {
 }
 
 // self income function here
-function startSelfCron() {
+async function startSelfCron() {
   // "0 0 * * 1-5" => every day at 12:00AM
   // Every weekday at 12:00
-  cron.schedule("0 0 * * 1-5", async () => {
+  // cron.schedule("0 0 * * 1-5", async () => {
     await selfEarning();
-  });
+  // });
+console.log("Self Income calculation finish")
+  
 }
 
-function startRewardCron() {
+async function startRewardCron() {
   // "0 6 2 * *" => har month ke 2st din, subah 6:00 AM
   cron.schedule("0 6 2 * *", async () => {
     await calculateRewardIncomes();
   });
+
+  console.log("reward calculation finish")
 }
 
 // startLevelCron();

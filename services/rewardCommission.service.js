@@ -1,3 +1,4 @@
+const commissionModel = require("../models/commission.model");
 const Reward = require("../models/reward.model");
 const User = require("../models/user.model");
 
@@ -49,6 +50,7 @@ async function calculateReward(user, levels, userid) {
       break;
     }
   }
+  // console.log(lastReward);
 
   return lastReward;
 }
@@ -85,7 +87,7 @@ async function calculateRewardIncomes() {
     ];
 
     // Reward check
-    const reward = calculateReward(
+    const reward = await calculateReward(
       { directIncome, teamIncome },
       level,
       user._id
@@ -94,16 +96,17 @@ async function calculateRewardIncomes() {
     user.walletReward += reward;
     await user.save();
 
-    const addRewardCommission = new CommissionModel({
-      userId: user._id, // referrer (receiver)
-      fromUserId: null,
-      level: 0, // 1..10
-      text: "Reward",
-      amount: reward,
-      date: new Date(), // the “earning day”
-    });
-
-    await addRewardCommission.save();
+    if (reward > 0) {
+      const addRewardCommission = new commissionModel({
+        userId: user._id, // referrer (receiver)
+        fromUserId: null,
+        level: 0, // 1..10
+        text: "Reward",
+        amount: reward,
+        date: new Date(), // the “earning day”
+      });
+      await addRewardCommission.save();
+    }
 
     // console.log(`User: ${user.sponsorID}`);
     // console.log(`Direct Income: ${directIncome}`);

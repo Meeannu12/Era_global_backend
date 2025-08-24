@@ -25,9 +25,9 @@ const commissionSchema = new mongoose.Schema(
 );
 
 // Idempotency: prevent duplicate payout for same day/source/level
-commissionSchema.index(
-  { userId: 1, fromUserId: 1, level: 1, date: 1 },
-  { unique: true }
-);
+// commissionSchema.index(
+//   { userId: 1, fromUserId: 1, level: 1, date: 1 },
+//   { unique: true }
+// );
 
 module.exports = mongoose.model("Commission", commissionSchema);
