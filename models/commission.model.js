@@ -13,12 +13,13 @@ const commissionSchema = new mongoose.Schema(
     fromUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      default:null
+      default: null,
       // required: true,
     }, // referral (source)
+    text: String,
     level: { type: Number, required: true }, // 1..10
     amount: { type: Number, required: true },
-    date: { type: Date, required: true }, // the “earning day”
+    date: { type: Date, default: new Date() }, // the “earning day”
   },
   { timestamps: true }
 );

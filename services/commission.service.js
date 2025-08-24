@@ -1,6 +1,7 @@
 const Commission = require("../models/commission.model");
 const Level = require("../models/level.model");
 const User = require("../models/user.model");
+// const CommissionModel = require("../models/commission.model");
 
 function startOfDay(d = new Date()) {
   const dt = new Date(d);
@@ -13,73 +14,159 @@ function isWeekend(date = new Date()) {
 }
 
 // credit chain for a single referral on given date
-async function distributeForReferral(referralId, onDate = new Date()) {
-  const dayKey = startOfDay(onDate);
+// async function distributeForReferral(referralId, onDate = new Date()) {
+//   const dayKey = startOfDay(onDate);
 
-  const referral = await User.findById(referralId).lean();
-  //   console.log("user",referral)
-  if (!referral) return { ok: false, reason: "referral_not_found" };
+//   const referral = await User.findById(referralId).lean();
+//   //   console.log("user",referral)
+//   if (!referral) return { ok: false, reason: "referral_not_found" };
 
-  // eligibility check (referral must have >=20 deposit)
-  if ((referral.walletDeposit || 0) < 20) {
-    return { ok: true, payouts: 0, reason: "referral_below_20" };
-  }
+//   // eligibility check (referral must have >=20 deposit)
+//   if ((referral.walletDeposit || 0) < 20) {
+//     return { ok: true, payouts: 0, reason: "referral_below_20" };
+//   }
 
-  // start from referral.referredBy (sponsorID string)
-  let sponsorID = referral.referredBy;
-  let level = 1;
-  let payouts = 0;
+//   // start from referral.referredBy (sponsorID string)
+//   let sponsorID = referral.referredBy;
+//   let level = 1;
+//   let payouts = 0;
 
-  // 🔥 Prefetch all level configs once
-  const levelMap = {};
-  const levels = await Level.find({}).lean();
-  for (const L of levels) levelMap[L.level] = L.commission;
+//   // 🔥 Prefetch all level configs once
+//   const levelMap = {};
 
-  while (sponsorID && level <= 10) {
-    // find referrer by sponsorID
-    const referrer = await User.findOne({ sponsorID }).exec();
-    if (!referrer) break;
+//   const commissions = [100, 0.5, 0.7, 1, 1.5, 1.75, 2, 2.25, 2.5, 3];
+//   // const levels = await Level.find({}).lean();
 
-    // referrer must also be eligible (wallet >=20)
-    if ((referrer.walletDeposit || 0) >= 20) {
-      // ✅ Commission percent direct map se uthao
-      const percent = levelMap[level] || 0;
+//   // Convert into same format as DB
+//   const levels = commissions.map((c, i) => ({
+//     level: i + 1, // Level starts from 1
+//     commission: c, // Value from array
+//   }));
 
-      // ✅ Base amount: dono me se chhoti deposit
-      const base = Math.min(referrer.walletDeposit, referral.walletDeposit);
-      const amount = (base * percent) / 100;
+//   for (const L of levels) levelMap[L.level] = L.commission;
 
-      if (amount > 0) {
-        try {
-          await Commission.create({
-            userId: referrer._id,
-            fromUserId: referral._id,
-            level,
-            amount,
-            date: dayKey,
-          });
+//   while (sponsorID && level <= 10) {
+//     // find referrer by sponsorID
+//     const referrer = await User.findOne({ sponsorID }).exec();
+//     if (!referrer) break;
 
-          // ✅ Save only in walletTeamEarn
-          referrer.walletTeamEarn = (referrer.walletTeamEarn || 0) + amount;
-          referrer.lastCreditedDate = new Date();
-          await referrer.save();
+//     // referrer must also be eligible (wallet >=20)
+//     if ((referrer.walletDeposit || 0) >= 20) {
+//       // ✅ Commission percent direct map se uthao
+//       const percent = levelMap[level] || 0;
 
-          payouts++;
-        } catch (err) {
-          // duplicate commission for the day -> ignore
-          if (err?.code !== 11000) throw err;
-        }
-      }
-      //   }
-    }
+//       // ✅ Base amount: dono me se chhoti deposit
+//       const base = Math.min(referrer.walletDeposit, referral.walletDeposit);
+//       const amount = (base * percent) / 100;
 
-    // move upline
-    sponsorID = referrer.referredBy; // referrer ke upline ka sponsorID
-    level++;
-  }
+//       if (amount > 0) {
+//         try {
+//           await Commission.create({
+//             userId: referrer._id,
+//             fromUserId: referral._id,
+//             level,
+//             amount,
+//             date: dayKey,
+//           });
 
-  return { ok: true, payouts };
-}
+//           // ✅ Save only in walletTeamEarn
+//           referrer.walletTeamEarn = (referrer.walletTeamEarn || 0) + amount;
+//           referrer.lastCreditedDate = new Date();
+//           await referrer.save();
+
+//           payouts++;
+//         } catch (err) {
+//           // duplicate commission for the day -> ignore
+//           if (err?.code !== 11000) throw err;
+//         }
+//       }
+//       //   }
+//     }
+
+//     // move upline
+//     sponsorID = referrer.referredBy; // referrer ke upline ka sponsorID
+//     level++;
+//   }
+
+//   return { ok: true, payouts };
+// }
+
+// async function distributeForReferral(referralId, onDate = new Date()) {
+//   const dayKey = startOfDay(onDate);
+
+//   const referral = await User.findById(referralId).lean();
+//   //   console.log("user",referral)
+//   if (!referral) return { ok: false, reason: "referral_not_found" };
+
+//   // eligibility check (referral must have >=20 deposit)
+//   if ((referral.walletDeposit || 0) < 20) {
+//     return { ok: true, payouts: 0, reason: "referral_below_20" };
+//   }
+
+//   // start from referral.referredBy (sponsorID string)
+//   let sponsorID = referral.sponsorID;
+//   let level = 1;
+//   let payouts = 0;
+
+//   // 🔥 Prefetch all level configs once
+//   const levelMap = {};
+
+//   const commissions = [100, 0.5, 0.7, 1, 1.5, 1.75, 2, 2.25, 2.5, 3];
+//   // const levels = await Level.find({}).lean();
+
+//   // Convert into same format as DB
+//   const levels = commissions.map((c, i) => ({
+//     level: i + 1, // Level starts from 1
+//     commission: c, // Value from array
+//   }));
+
+//   for (const L of levels) levelMap[L.level] = L.commission;
+
+//   while (sponsorID && level <= 10) {
+//     // find referrer by sponsorID
+//     const referrer = await User.findOne({ sponsorID }).exec();
+//     if (!referrer) break;
+
+//     // referrer must also be eligible (wallet >=20)
+//     if ((referrer.walletDeposit || 0) >= 20) {
+//       // ✅ Commission percent direct map se uthao
+//       const percent = levelMap[level] || 0;
+
+//       // ✅ Base amount: dono me se chhoti deposit
+//       const base = Math.min(referrer.walletDeposit, referral.walletDeposit);
+//       const amount = (base * percent) / 100;
+
+//       if (amount > 0) {
+//         try {
+//           await Commission.create({
+//             userId: referrer._id,
+//             fromUserId: referral._id,
+//             level,
+//             amount,
+//             date: dayKey,
+//           });
+
+//           // ✅ Save only in walletTeamEarn
+//           referrer.walletTeamEarn = (referrer.walletTeamEarn || 0) + amount;
+//           referrer.lastCreditedDate = new Date();
+//           await referrer.save();
+
+//           payouts++;
+//         } catch (err) {
+//           // duplicate commission for the day -> ignore
+//           if (err?.code !== 11000) throw err;
+//         }
+//       }
+//       //   }
+//     }
+
+//     // move upline
+//     sponsorID = referrer.referredBy; // referrer ke upline ka sponsorID
+//     level++;
+//   }
+
+//   return { ok: true, payouts };
+// }
 
 // daily distribution for all users (Mon–Fri only)
 async function runDailyDistribution(onDate = new Date()) {
@@ -101,9 +188,60 @@ async function runDailyDistribution(onDate = new Date()) {
   return { ok: true, date: dayKey, totalPayouts };
 }
 
+const levels = [100, 0.5, 0.7, 1, 1.5, 1.75, 2, 2.25, 2.5, 3]; // Level percent
+let commissionRecords = []; // temporary storage
+
+// Recursive function
+async function distributeCommission(userID, level = 1, maxLevel = 10) {
+  if (level > maxLevel) return;
+
+  const referrals = await User.find({ referredBy: userID.sponsorID });
+
+  for (const ref of referrals) {
+    if (ref.walletDeposit >= 20) {
+      const baseCommission = (ref.walletDeposit * 0.25) / 100;
+      const levelPercent = levels[level - 1] || 0;
+      const income = (baseCommission * levelPercent) / 100;
+
+      commissionRecords.push({
+        userId: userID._id,
+        level: level,
+        amount: income,
+      });
+    }
+
+    await distributeCommission(ref, level + 1, maxLevel);
+  }
+}
+
+// Save all commission records in DB at once
+async function saveAllIncomes() {
+  if (commissionRecords.length > 0) {
+    console.log(commissionRecords);
+    // await CommissionModel.insertMany(commissionRecords);
+
+    commissionRecords = []; // reset
+  }
+}
+
+// Example main function
+async function main() {
+  // Start commission calculation for all users (or a specific user)
+  const users = await User.find(); // all users
+  for (const user of users) {
+    await distributeCommission(user);
+  }
+
+  await saveAllIncomes();
+
+  console.log("Commission calculation finished!");
+}
+
+main();
+
 module.exports = {
   startOfDay,
   isWeekend,
-  distributeForReferral,
+  // distributeForReferral,
   runDailyDistribution,
 };

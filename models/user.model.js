@@ -64,6 +64,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    walletRoyalty: {
+      type: Number,
+      default: 0,
+    },
     lastCreditedDate: { type: Date },
     level: {
       type: Number,
