@@ -5,6 +5,7 @@ const { levelTeamIncome } = require("./commission.service");
 const CommissionModel = require("../models/commission.model");
 const User = require("../models/user.model");
 const selfEarning = require("../cronJobs/walletCredit");
+const calculateRewardIncomes = require("./rewardCommission.service");
 // import User from "./models/User"; // mongoose model
 
 // helper function - recursive
@@ -16,7 +17,7 @@ async function getTeamIncome(userId, level, maxLevel) {
 
   for (const ref of referrals) {
     total += ref.walletDeposit; // unka deposit
-    total += await getTeamIncome(ref._id, level + 1, maxLevel); // unke niche
+    total += await getTeamIncome(ref.sponsorID, level + 1, maxLevel); // unke niche
   }
 
   return total;
@@ -131,7 +132,19 @@ function startSelfCron() {
   });
 }
 
+function startRewardCron() {
+  // "0 6 2 * *" => har month ke 2st din, subah 6:00 AM
+  cron.schedule("0 6 2 * *", async () => {
+    await calculateRewardIncomes();
+  });
+}
+
 // startLevelCron();
 // startRoyaltyCron()
 
-module.exports = { startRoyaltyCron, startLevelCron, startSelfCron };
+module.exports = {
+  startRoyaltyCron,
+  startLevelCron,
+  startSelfCron,
+  startRewardCron,
+};
