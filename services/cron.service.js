@@ -117,7 +117,7 @@ async function startRoyaltyCron() {
 }
 
 // level income function here
-function startLevelCron() {
+async function startLevelCron() {
   // Every weekday at 01:00
   cron.schedule("0 1 * * 1-5", async () => {
     console.log("Running commission job Monday-Friday at 1 AM");

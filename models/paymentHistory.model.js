@@ -14,6 +14,7 @@ const paymentHistorySchema = new mongoose.Schema(
       enum: ["Deposit", "Withdraw"], // ✅ only these two values allowed
       required: true,
     },
+    transaction: String,
     senderWallet: {
       type: String,
     },

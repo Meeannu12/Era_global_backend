@@ -5,8 +5,7 @@ const {
   startLevelCron,
   startSelfCron,
   startRewardCron,
-} = require("./services/cron.service");
-// require("./cronJobs/walletCredit"); // ✅ Ye line cron job ko import karke auto-run karegi
+} = require("./services/cron.service"); //✅ Ye line cron job ko import karke
 
 startLevelCron();
 startRoyaltyCron();

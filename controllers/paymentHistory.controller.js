@@ -5,7 +5,8 @@ const User = require("../models/user.model");
 
 const addDepositHistory = async (req, res) => {
   const userID = req.userId;
-  const { senderWallet, amount, receiveWallet, sponsorID } = req.body;
+  const { senderWallet, amount, receiveWallet, sponsorID, transaction } =
+    req.body;
   //   console.log("addDepositHistory", senderWallet, amount, receiveWallet);
   try {
     const user = await User.findOne({ userID });
@@ -17,6 +18,7 @@ const addDepositHistory = async (req, res) => {
       mode: "Deposit",
       senderWallet,
       receiveWallet,
+      transaction,
       amount,
     });
     await addDeposit.save();
