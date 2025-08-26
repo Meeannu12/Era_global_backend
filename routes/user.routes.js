@@ -41,4 +41,10 @@ router.post(
   authenticateToken,
   userController.addWalletAddress
 );
+
+router.get(
+  "/getTeamIncomFindByUser/:sponsorID",
+  authenticateToken,
+  userController.getTeamIncomFindByUser
+);
 module.exports = router;

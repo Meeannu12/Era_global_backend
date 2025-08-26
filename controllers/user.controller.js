@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const { getTeamIncome } = require("../services/cron.service");
 const {
   getReferralTree,
   getReferralCountByEachLevel,
@@ -254,6 +255,38 @@ async function getAllUserSponsorBySponsorID(req, res) {
   }
 }
 
+const getTeamIncomFindByUser = async (req, res) => {
+  const sponsorID = req.params.sponsorID;
+  try {
+    const user = await User.findOne({ sponsorID });
+    const directRefs = await User.find({ referredBy: user.sponsorID }); // cick first user
+    // direct income = apna deposit + direct refs ka deposit
+    const directIncome =
+      user.walletDeposit +
+      directRefs.reduce((sum, ref) => sum + ref.walletDeposit, 0);
+
+    // team income (level 2 se 10 tak)
+    let teamIncome = 0;
+    for (const ref of directRefs) {
+      teamIncome += await getTeamIncome(ref.sponsorID, 2, 10); // 2 se start because 1 = direct
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "get user Team Income",
+      directIncome,
+      teamIncome,
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "faild to get user Team Income",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getUser,
   getUsersBySponsorID,
@@ -263,4 +296,5 @@ module.exports = {
   changePassword,
   forgetPassword,
   addWalletAddress,
+  getTeamIncomFindByUser,
 };

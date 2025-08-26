@@ -123,7 +123,7 @@ async function startLevelCron() {
   console.log("Running commission job Monday-Friday at 1 AM");
   cron.schedule("0 1 * * 1-5", async () => {
     await levelTeamIncome();
-     console.log("level commission job is finish");
+    console.log("level commission job is finish");
   });
 }
 
@@ -153,4 +153,5 @@ module.exports = {
   startLevelCron,
   startSelfCron,
   startRewardCron,
+  getTeamIncome,
 };
