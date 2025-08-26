@@ -49,6 +49,7 @@ async function selfEarning() {
         await commissionModel.create({
           userId: user._id,
           amount: amountToAdd,
+          text: "Self Income",
           level: 0,
           date: today,
         });

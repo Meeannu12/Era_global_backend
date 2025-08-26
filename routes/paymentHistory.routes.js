@@ -40,4 +40,21 @@ paymentHistoryRoute.post(
   PaymentHistory.updatePaymentStatus
 );
 
+paymentHistoryRoute.get(
+  "/getDepositHistorybyUser/:sponsorID",
+  authenticateToken,
+  PaymentHistory.getDepositHistorybyUser
+);
+
+paymentHistoryRoute.get(
+  "/getWithdrawalHistorybyUser/:sponsorID",
+  authenticateToken,
+  PaymentHistory.getWithdrawalHistorybyUser
+);
+
+paymentHistoryRoute.get(
+  "/getCommissionHistoryToDay/:sponsorID",
+  authenticateToken,
+  PaymentHistory.getCommissionHistoryToDay
+);
 module.exports = paymentHistoryRoute;

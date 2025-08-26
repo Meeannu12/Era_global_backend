@@ -1,4 +1,6 @@
+const CommissionModel = require("../models/commission.model");
 const { findById } = require("../models/level.model");
+// const paymentHistoryModel = require("../models/paymentHistory.model");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
 const Pin = require("../models/pin.model");
 const User = require("../models/user.model");
@@ -219,6 +221,144 @@ const updatePaymentStatus = async (req, res) => {
   }
 };
 
+const getDepositHistorybyUser = async (req, res) => {
+  try {
+    const sponsorID = req.params.sponsorID;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const DepositPayment = await PaymentHistoryModel.find({
+      sponsorID,
+      mode: "Deposit",
+    })
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 });
+
+    const count = await PaymentHistoryModel.countDocuments({
+      sponsorID,
+      mode: "Deposit",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get User Deposit Information Successfully",
+      data: {
+        payment: DepositPayment,
+        count: count,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(count / limit),
+          limit: limit,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get all user sponsor by sponsor ID error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Get all Deposit Payment by sponsor ID failed",
+      error: error.message,
+    });
+  }
+};
+
+const getWithdrawalHistorybyUser = async (req, res) => {
+  try {
+    const sponsorID = req.params.sponsorID;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const WithdrawPayment = await PaymentHistoryModel.find({
+      sponsorID,
+      mode: "Withdraw",
+    })
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 });
+
+    const count = await PaymentHistoryModel.countDocuments({
+      sponsorID,
+      mode: "Withdraw",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get User Deposit Information Successfully",
+      data: {
+        payment: WithdrawPayment,
+        count: count,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(count / limit),
+          limit: limit,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get all user sponsor by sponsor ID error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Get all Deposit Payment by sponsor ID failed",
+      error: error.message,
+    });
+  }
+};
+
+// get user all commission today only
+const getCommissionHistoryToDay = async (req, res) => {
+  try {
+    const sponsorID = req.params.sponsorID;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const user = await User.findOne({ sponsorID });
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0); // 00:00:00
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999); // 23:59:59
+
+    const userCommission = await CommissionModel.find({
+      userId: user._id,
+      createdAt: { $gte: startOfToday, $lte: endOfToday },
+    }).populate("fromUserId")
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 });
+
+    // const count = await CommissionModel.countDocuments({
+    //   userId: user._id,
+    //   createdAt: { $gte: startOfToday, $lte: endOfToday },
+    // });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get User All Commission Information Successfully",
+      data: {
+        payment: userCommission,
+        count: userCommission.length,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(userCommission.length / limit),
+          limit: limit,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get all user sponsor by sponsor ID error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Get all Deposit Payment by sponsor ID failed",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addDepositHistory,
   addWithdrawHistory,
@@ -226,4 +366,7 @@ module.exports = {
   getWithdrawal,
   getDeposit,
   updatePaymentStatus,
+  getDepositHistorybyUser,
+  getWithdrawalHistorybyUser,
+  getCommissionHistoryToDay,
 };
