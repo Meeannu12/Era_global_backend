@@ -74,10 +74,10 @@ async function levelTeamIncome() {
     console.log("Today is Saturday, function will not run.");
     return;
   }
-  if (hour !== 1) {
-    console.log("It is not 1 AM yet, function will not run.");
-    return;
-  }
+  // if (hour !== 1) {
+  //   console.log("It is not 1 AM yet, function will not run.");
+  //   return;
+  // }
   // Start commission calculation for all users (or a specific user)
   const users = await User.find(); // all users
   for (const user of users) {
