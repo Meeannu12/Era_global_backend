@@ -287,6 +287,39 @@ const getTeamIncomFindByUser = async (req, res) => {
   }
 };
 
+const addTaskClaim = async (req, res) => {
+  const userID = req.userId;
+  const { setClaimTime, walletClaim } = req.body;
+
+  try {
+    const newUser = await User.findOne({ userID });
+
+    const now = Date.now();
+    // 24 hours in milliseconds
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    if (now - newUser.setClaimTime < twentyFourHours) {
+      return res
+        .status(400)
+        .json({ success: false, message: "You already Claim your Task" });
+    }
+
+    newUser.setClaimTime = setClaimTime;
+    newUser.walletClaim += walletClaim;
+
+    await newUser.save();
+    res
+      .status(201)
+      .json({ success: true, message: "User Task Claimed successful" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "faild to Put Claim bonus",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getUser,
   getUsersBySponsorID,
@@ -297,4 +330,5 @@ module.exports = {
   forgetPassword,
   addWalletAddress,
   getTeamIncomFindByUser,
+  addTaskClaim,
 };

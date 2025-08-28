@@ -56,6 +56,13 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    walletClaim: {
+      type: Number,
+      default: 0,
+    },
+    setClaimTime: {
+      type: Date,
+    },
     walletSelfEarn: {
       type: Number,
       default: 0,
@@ -68,7 +75,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-     walletReward: {
+    walletReward: {
       type: Number,
       default: 0,
     },

@@ -47,4 +47,6 @@ router.get(
   authenticateToken,
   userController.getTeamIncomFindByUser
 );
+
+router.post("/addTaskClaim", authenticateToken, userController.addTaskClaim);
 module.exports = router;
