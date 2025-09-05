@@ -175,12 +175,14 @@ const updatePaymentStatus = async (req, res) => {
         getPin.save();
       }
       if (method.toLowerCase() === "withdraw") {
+        const amountToDeduct =
+          updatePayment.amount + updatePayment.amount * 0.1; // 10% extra cut
         const updatedUser = await User.findOneAndUpdate(
           {
             sponsorID: updatePayment.sponsorID,
-            walletTeamEarn: { $gte: updatePayment.amount },
+            walletEarning: { $gte: amountToDeduct },
           },
-          { $inc: { walletTeamEarn: -updatePayment.amount } },
+          { $inc: { walletEarning: -amountToDeduct } },
           { new: true }
         );
 
@@ -209,7 +211,7 @@ const updatePaymentStatus = async (req, res) => {
     res.json({
       success: true,
       message: "Status updated successfully",
-      payment: updatedPayment,
+      // payment: updatedPayment,
     });
   } catch (error) {
     console.error("Get user error:", error);
@@ -326,7 +328,8 @@ const getCommissionHistoryToDay = async (req, res) => {
     const userCommission = await CommissionModel.find({
       userId: user._id,
       createdAt: { $gte: startOfToday, $lte: endOfToday },
-    }).populate("fromUserId")
+    })
+      .populate("fromUserId")
       .limit(limit)
       .skip(skip)
       .sort({ createdAt: -1 });
