@@ -94,6 +94,7 @@ async function calculateRewardIncomes() {
     );
 
     user.walletReward += reward;
+    user.walletEarning += reward;
     await user.save();
 
     if (reward > 0) {

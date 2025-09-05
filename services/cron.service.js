@@ -75,6 +75,7 @@ async function calculateIncomes() {
     const royalty = calculateRoyalty({ directIncome, teamIncome }, level);
 
     user.walletRoyalty += royalty;
+    user.walletEarning += royalty;
     await user.save();
 
     const addRoyaltyCommission = new CommissionModel({
@@ -144,9 +145,6 @@ async function startRewardCron() {
     console.log("reward calculation finish");
   });
 }
-
-// startLevelCron();
-// startRoyaltyCron()
 
 module.exports = {
   startRoyaltyCron,

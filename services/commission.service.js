@@ -48,7 +48,9 @@ async function saveAllIncomes() {
     for (const record of userTotals) {
       await User.findByIdAndUpdate(
         record.userId,
-        { $inc: { walletTeamEarn: record.amount } },
+        {
+          $inc: { walletTeamEarn: record.amount, walletEarning: record.amount },
+        },
         { new: true } // upsert optional, agar user exist nahi to create
       );
     }
