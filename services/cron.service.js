@@ -119,7 +119,7 @@ async function startRoyaltyCron() {
 
 // level income function here
 async function startLevelCron() {
-  // Every weekday at 01:00
+  // Every weekday at 01:00 AM
   console.log("Running commission job Monday-Friday at 1 AM");
   cron.schedule("0 1 * * 1-5", async () => {
     await levelTeamIncome();
@@ -139,7 +139,7 @@ async function startSelfCron() {
 
 async function startRewardCron() {
   // "0 6 2 * *" => har month ke 2st din, subah 6:00 AM
-  cron.schedule("0 6 2 * *", async () => {
+  cron.schedule("0 2 * * 1-5", async () => {
     await calculateRewardIncomes();
     console.log("reward calculation finish");
   });
