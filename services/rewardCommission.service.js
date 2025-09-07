@@ -30,19 +30,28 @@ async function getTeamIncome(userId, level, maxLevel) {
 // Ye function ek user ke liye royalty decide karega
 async function calculateReward(user, levels, userid) {
   let lastReward = 0;
-  //   const checkLevel = await Reward.find();
 
   for (const lvl of levels) {
     if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
-      // condition pass ho gayi → agle level tak jao
+      // pehle check karo userid exist karta hai ya nahi
+      const existing = await Reward.findOne({
+        level: lvl.level,
+        userIds: userid,
+      });
+
+      if (existing) {
+        // agar already added hai → skip this level and continue loop
+        continue;
+      }
+
+      // agar nahi mila → add userid
       const updateResult = await Reward.updateOne(
         { level: lvl.level },
-        { $addToSet: { userIds: userid } },
+        { $push: { userIds: userid } },
         { upsert: true }
       );
 
       if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
-        // matlab userId array me add hua ya naya level create hua
         lastReward = lvl.reward;
       }
     } else {
@@ -50,10 +59,57 @@ async function calculateReward(user, levels, userid) {
       break;
     }
   }
-  // console.log(lastReward);
 
   return lastReward;
 }
+
+// async function calculateReward(user, levels, userid) {
+//   let lastReward = 0;
+
+//   console.log("Income", user);
+
+//   console.log("levels", levels);
+
+//   for (const lvl of levels) {
+//     console.log("level Loop", lvl);
+//     if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
+//       // 1. check if doc exists
+//       const reward = await Reward.findOne({ level: lvl.level });
+
+//       if (reward) {
+//         console.log("Enter reward");
+//         // doc mila
+//         if (reward.userIds.includes(userid)) {
+//           // already added → reward mat do
+//           console.log("Already Exist");
+//           return 0;
+//         }
+
+//         // nahi hai → add userId
+//         await Reward.updateOne(
+//           { level: lvl.level },
+//           { $push: { userIds: userid } }
+//         );
+//       } else {
+//         // doc hi nahi mila → naya create kar do
+//         console.log("Create a new reward");
+//         await Reward.create({
+//           level: lvl.level,
+//           userIds: [userid],
+//         });
+//       }
+
+//       console.log("reward Income", lvl.reward);
+
+//       // agar successfully add hua
+//       lastReward = lvl.reward;
+//     } else {
+//       break; // condition fail → stop
+//     }
+//   }
+
+//   return lastReward;
+// }
 
 // main calculation for all users
 async function calculateRewardIncomes() {
@@ -117,4 +173,4 @@ async function calculateRewardIncomes() {
   }
 }
 
-module.exports = calculateRewardIncomes;
+module.exports = { calculateRewardIncomes, calculateReward };

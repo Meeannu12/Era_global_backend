@@ -141,7 +141,7 @@ async function startSelfCron() {
 async function startRewardCron() {
   // "0 6 2 * *" => har month ke 2st din, subah 6:00 AM
   cron.schedule("0 2 * * 1-5", async () => {
-    await calculateRewardIncomes();
+    // await calculateRewardIncomes();
     console.log("reward calculation finish");
   });
 }
