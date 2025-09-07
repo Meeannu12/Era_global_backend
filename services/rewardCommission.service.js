@@ -97,7 +97,7 @@ async function calculationRoyalty(user, levels, userid) {
       );
 
       if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
-        lastRoyalty += lvl.royalty;
+        lastRoyalty = lvl.royalty;
       }
     } else {
       break;
