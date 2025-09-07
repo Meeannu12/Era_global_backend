@@ -113,7 +113,7 @@ async function startRoyaltyCron() {
   // "0 6 1 * *" => har month ke 1st din, subah 6:00 AM
   cron.schedule("0 6 1 * *", async () => {
     console.log("royalty cron job run");
-    await calculateRoyaltyForAllUsers();
+    // await calculateRoyaltyForAllUsers();
     console.log("royalty cron job run finish");
   });
 }

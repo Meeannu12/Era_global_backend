@@ -1,5 +1,7 @@
+const moment = require("moment");
 const commissionModel = require("../models/commission.model");
 const Reward = require("../models/reward.model");
+const Royalty = require("../models/royalty.model");
 const User = require("../models/user.model");
 
 // Reward calculate karne wala function
@@ -63,53 +65,47 @@ async function calculateReward(user, levels, userid) {
   return lastReward;
 }
 
-// async function calculateReward(user, levels, userid) {
-//   let lastReward = 0;
+async function calculationRoyalty(user, levels, userid) {
+  let lastRoyalty = 0;
 
-//   console.log("Income", user);
+  for (const lvl of levels) {
+    if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
+      // check if already rewarded this month
+      const existing = await Royalty.findOne({
+        level: lvl.level,
+        "userRoyalty.userIds": userid,
+        "userRoyalty.date": {
+          $gte: moment().startOf("month").toDate(),
+          $lte: moment().endOf("month").toDate(),
+        },
+      });
 
-//   console.log("levels", levels);
+      if (existing) {
+        // is month me reward already mil chuka hai
+        continue; // skip karke next level check karo
+      }
 
-//   for (const lvl of levels) {
-//     console.log("level Loop", lvl);
-//     if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
-//       // 1. check if doc exists
-//       const reward = await Reward.findOne({ level: lvl.level });
+      // nahi mila to reward add kar do
+      const updateResult = await Royalty.updateOne(
+        { level: lvl.level },
+        {
+          $push: {
+            userRoyalty: { userIds: userid, date: new Date() },
+          },
+        },
+        { upsert: true }
+      );
 
-//       if (reward) {
-//         console.log("Enter reward");
-//         // doc mila
-//         if (reward.userIds.includes(userid)) {
-//           // already added → reward mat do
-//           console.log("Already Exist");
-//           return 0;
-//         }
+      if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
+        lastRoyalty += lvl.royalty;
+      }
+    } else {
+      break;
+    }
+  }
 
-//         // nahi hai → add userId
-//         await Reward.updateOne(
-//           { level: lvl.level },
-//           { $push: { userIds: userid } }
-//         );
-//       } else {
-//         // doc hi nahi mila → naya create kar do
-//         console.log("Create a new reward");
-//         await Reward.create({
-//           level: lvl.level,
-//           userIds: [userid],
-//         });
-//       }
-
-//       console.log("reward Income", lvl.reward);
-
-//       // agar successfully add hua
-//       lastReward = lvl.reward;
-//     } else {
-//       break; // condition fail → stop
-//     }
-//   }
-
-//   return lastReward;
-// }
+  return lastRoyalty;
+}
 
 // main calculation for all users
 async function calculateRewardIncomes() {
@@ -173,4 +169,8 @@ async function calculateRewardIncomes() {
   }
 }
 
-module.exports = { calculateRewardIncomes, calculateReward };
+module.exports = {
+  calculateRewardIncomes,
+  calculateReward,
+  calculationRoyalty,
+};

@@ -1,23 +1,38 @@
 const CommissionModel = require("../models/commission.model");
 const User = require("../models/user.model");
 const { getTeamIncome } = require("../services/cron.service");
-const { calculateReward } = require("../services/rewardCommission.service");
+const {
+  calculateReward,
+  calculationRoyalty,
+} = require("../services/rewardCommission.service");
 const {
   getReferralTree,
   getReferralCountByEachLevel,
 } = require("../services/user.service");
 
 const rewardLevel = [
-  { d_Income: 300, level: 1, t_Income: 300, reward: 0 },
-  { d_Income: 350, level: 2, t_Income: 700, reward: 50 },
-  { d_Income: 500, level: 3, t_Income: 2000, reward: 100 },
-  { d_Income: 600, level: 4, t_Income: 700, reward: 600 },
-  { d_Income: 1000, level: 5, t_Income: 22000, reward: 1100 },
-  { d_Income: 2000, level: 6, t_Income: 55000, reward: 3300 },
-  { d_Income: 3000, level: 7, t_Income: 110000, reward: 10000 },
-  { d_Income: 4000, level: 8, t_Income: 500000, reward: 25000 },
-  { d_Income: 7000, level: 9, t_Income: 1500000, reward: 250000 },
-  { d_Income: 15000, level: 10, t_Income: 5000000, reward: 1100000 },
+  { d_Income: 300, level: 1, t_Income: 300, reward: 0, royalty: 10 },
+  { d_Income: 350, level: 2, t_Income: 700, reward: 50, royalty: 50 },
+  { d_Income: 500, level: 3, t_Income: 2000, reward: 100, royalty: 100 },
+  { d_Income: 600, level: 4, t_Income: 700, reward: 600, royalty: 300 },
+  { d_Income: 1000, level: 5, t_Income: 22000, reward: 1100, royalty: 600 },
+  { d_Income: 2000, level: 6, t_Income: 55000, reward: 3300, royalty: 1100 },
+  { d_Income: 3000, level: 7, t_Income: 110000, reward: 10000, royalty: 2500 },
+  { d_Income: 4000, level: 8, t_Income: 500000, reward: 25000, royalty: 4000 },
+  {
+    d_Income: 7000,
+    level: 9,
+    t_Income: 1500000,
+    reward: 250000,
+    royalty: 11000,
+  },
+  {
+    d_Income: 15000,
+    level: 10,
+    t_Income: 5000000,
+    reward: 1100000,
+    royalty: 21000,
+  },
 ];
 
 const editUserProfile = async (req, res) => {
@@ -293,8 +308,18 @@ const getTeamIncomFindByUser = async (req, res) => {
       user._id
     );
 
+    const royalty = await calculationRoyalty(
+      { directIncome, teamIncome },
+      rewardLevel,
+      user._id
+    );
+
+    // console.log("royalty", royalty);
+
+    const newWallet = royalty + reward;
+    user.walletRoyalty += royalty;
     user.walletReward += reward;
-    user.walletEarning += reward;
+    user.walletEarning += newWallet;
     await user.save();
 
     if (reward > 0) {
@@ -304,6 +329,18 @@ const getTeamIncomFindByUser = async (req, res) => {
         level: 0, // 1..10
         text: "Reward",
         amount: reward,
+        date: new Date(), // the “earning day”
+      });
+      await addRewardCommission.save();
+    }
+
+    if (royalty > 0) {
+      const addRewardCommission = new CommissionModel({
+        userId: user._id, // referrer (receiver)
+        fromUserId: null,
+        level: 0, // 1..10
+        text: "royalty",
+        amount: royalty,
         date: new Date(), // the “earning day”
       });
       await addRewardCommission.save();
