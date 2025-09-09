@@ -1,3 +1,4 @@
+const adminChargeModel = require("../models/adminCharge.model");
 const CommissionModel = require("../models/commission.model");
 const { findById } = require("../models/level.model");
 // const paymentHistoryModel = require("../models/paymentHistory.model");
@@ -141,6 +142,7 @@ const getDeposit = async (req, res) => {
 
 // Allowed statuses
 const ALLOWED_STATUSES = ["Unverified", "Verified", "Rejected"];
+
 const updatePaymentStatus = async (req, res) => {
   const { status, method } = req.body;
   const { id } = req.params;
@@ -175,14 +177,14 @@ const updatePaymentStatus = async (req, res) => {
         getPin.save();
       }
       if (method.toLowerCase() === "withdraw") {
-        const amountToDeduct =
-          updatePayment.amount + updatePayment.amount * 0.1; // 10% extra cut
+        // const amountToDeduct =
+        //   updatePayment.amount - updatePayment.amount * 0.1; // 10% extra cut
         const updatedUser = await User.findOneAndUpdate(
           {
             sponsorID: updatePayment.sponsorID,
-            walletEarning: { $gte: amountToDeduct },
+            walletEarning: { $gte: updatePayment.amount },
           },
-          { $inc: { walletEarning: -amountToDeduct } },
+          { $inc: { walletEarning: -updatePayment.amount } },
           { new: true }
         );
 
@@ -193,6 +195,12 @@ const updatePaymentStatus = async (req, res) => {
               "Insufficient balance in walletTeamEarn or user not found.",
           });
         }
+
+        await adminChargeModel.create({
+          userId: updatedUser._id,
+          withdrawAmount: updatePayment.amount,
+          adminCharge: updatePayment.amount * 0.1,
+        });
       }
     }
 
