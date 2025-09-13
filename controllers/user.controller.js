@@ -314,8 +314,7 @@ const getTeamIncomFindByUser = async (req, res) => {
       user._id
     );
 
-    // console.log("royalty", royalty);
-
+    
     const newWallet = royalty + reward;
     if (royalty > 0) {
       user.walletRoyalty = royalty;
