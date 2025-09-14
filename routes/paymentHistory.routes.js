@@ -57,4 +57,10 @@ paymentHistoryRoute.get(
   authenticateToken,
   PaymentHistory.getCommissionHistoryToDay
 );
+
+paymentHistoryRoute.get(
+  "/getWalletDetails",
+  authenticateToken,
+  PaymentHistory.getWalletDetails
+);
 module.exports = paymentHistoryRoute;

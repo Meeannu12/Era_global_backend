@@ -1,8 +1,12 @@
 const moment = require("moment");
 const commissionModel = require("../models/commission.model");
 const Reward = require("../models/reward.model");
-const Royalty = require("../models/royalty.model");
+const { Royalty, RoyaltyAmountStatus } = require("../models/royalty.model");
 const User = require("../models/user.model");
+
+const now = new Date();
+const monthStart = moment(now).startOf("month").toDate();
+const monthEnd = moment(now).endOf("month").toDate();
 
 // Reward calculate karne wala function
 async function calculateRewardForAllUsers() {
@@ -75,8 +79,8 @@ async function calculationRoyalty(user, levels, userid) {
         level: lvl.level,
         "userRoyalty.userIds": userid,
         "userRoyalty.date": {
-          $gte: moment().startOf("month").toDate(),
-          $lte: moment().endOf("month").toDate(),
+          $gte: monthStart,
+          $lte: monthEnd,
         },
       });
 
@@ -97,6 +101,45 @@ async function calculationRoyalty(user, levels, userid) {
       );
 
       if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
+        // Find if any entry for this user in this month
+        const existing = await RoyaltyAmountStatus.findOne({
+          userIds: userid,
+          date: { $gte: monthStart, $lte: monthEnd },
+        });
+
+        if (existing) {
+          if (lvl.level > existing.level) {
+            // If current level is higher → update
+            existing.level = lvl.level;
+            existing.amount += lvl.royalty - existing.amount;
+            existing.date = now;
+
+            await User.findByIdAndUpdate(userid, {
+              $inc: {
+                walletEarning: lvl.royalty - existing.amount,
+              },
+            });
+
+            await existing.save();
+          }
+          // else: level is same or lower — skip
+        } else {
+          // No entry this month — insert new
+          const newEntry = new RoyaltyAmountStatus({
+            userIds: userid,
+            level: lvl.level,
+            amount: lvl.royalty,
+            status: "unpaid",
+            date: now,
+          });
+          await User.findByIdAndUpdate(userid, {
+            $inc: {
+              walletEarning: lvl.royalty,
+            },
+          });
+          await newEntry.save();
+        }
+
         lastRoyalty = lvl.royalty;
       }
     } else {

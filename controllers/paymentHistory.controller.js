@@ -4,7 +4,13 @@ const { findById } = require("../models/level.model");
 // const paymentHistoryModel = require("../models/paymentHistory.model");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
 const Pin = require("../models/pin.model");
+const { RoyaltyAmountStatus } = require("../models/royalty.model");
 const User = require("../models/user.model");
+
+const moment = require("moment");
+// 1. Month ka start & end date
+const monthStart = moment().startOf("month").toDate();
+const monthEnd = moment().endOf("month").toDate();
 
 const addDepositHistory = async (req, res) => {
   const userID = req.userId;
@@ -370,6 +376,68 @@ const getCommissionHistoryToDay = async (req, res) => {
   }
 };
 
+const getWalletDetails = async (req, res) => {
+  const userID = req.userId;
+  try {
+    const user = await User.findOne({ userID });
+
+    const EarningCommission = await CommissionModel.find({ userId: user._id });
+
+    // get total commission Earning
+    const totalAmount = EarningCommission.reduce((sum, item) => {
+      return sum + (item.amount || 0);
+    }, 0);
+
+    // 4. Sirf current month ki entries filter karo
+    const currentMonthEarnings = EarningCommission.filter((item) => {
+      return moment(item.date).isBetween(monthStart, monthEnd, null, "[]");
+    });
+
+    // 5. Current month earning ka sum
+    const currentMonthTotal = currentMonthEarnings.reduce((sum, item) => {
+      return sum + (item.amount || 0);
+    }, 0);
+
+    const withDrawal = await PaymentHistoryModel.find({
+      user: user._id,
+      mode: "Withdraw",
+      verficationStatus: "Verified",
+    });
+
+    const totalWithDrawal = withDrawal.reduce((sum, item) => {
+      return sum + (parseInt(item.amount) || 0);
+    }, 0);
+
+    const royalty = await RoyaltyAmountStatus.find({
+      userIds: user._id,
+      status: "unpaid",
+    });
+
+    const totalRoyalty = royalty.reduce((sum, item) => {
+      return sum + (item.amount || 0);
+    }, 0);
+
+    const Datalist = {
+      totalAmount,
+      currentMonthTotal,
+      totalWithDrawal,
+      totalRoyalty,
+    };
+
+    res.status(201).json({
+      success: true,
+      message: "user Amount get Sections",
+      Datalist,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "faild to get Royalty Entry",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addDepositHistory,
   addWithdrawHistory,
@@ -380,4 +448,5 @@ module.exports = {
   getDepositHistorybyUser,
   getWithdrawalHistorybyUser,
   getCommissionHistoryToDay,
+  getWalletDetails,
 };

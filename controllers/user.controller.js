@@ -9,6 +9,10 @@ const {
   getReferralTree,
   getReferralCountByEachLevel,
 } = require("../services/user.service");
+const PaymentHistoryModel = require("../models/paymentHistory.model");
+const { RoyaltyAmountStatus } = require("../models/royalty.model");
+
+
 
 const rewardLevel = [
   { d_Income: 300, level: 1, t_Income: 300, reward: 0, royalty: 10 },
@@ -314,13 +318,12 @@ const getTeamIncomFindByUser = async (req, res) => {
       user._id
     );
 
-    
-    const newWallet = royalty + reward;
+    // const newWallet = royalty + reward;
     if (royalty > 0) {
       user.walletRoyalty = royalty;
     }
     user.walletReward += reward;
-    user.walletEarning += newWallet;
+    user.walletEarning += reward;
     await user.save();
 
     if (reward > 0) {
@@ -395,6 +398,8 @@ const addTaskClaim = async (req, res) => {
     });
   }
 };
+
+
 
 module.exports = {
   getUser,
