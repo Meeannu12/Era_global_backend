@@ -30,6 +30,7 @@ const paymentHistorySchema = new mongoose.Schema(
     amount: {
       type: String,
     },
+    walletType: { type: String, enum: ["royaltyWallet", "selfWallet"] },
     verficationStatus: {
       type: String,
       enum: ["Unverified", "Verified", "Rejected"], // ✅ only these three values allowed

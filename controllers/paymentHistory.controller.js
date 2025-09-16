@@ -49,7 +49,8 @@ const addDepositHistory = async (req, res) => {
 
 const addWithdrawHistory = async (req, res) => {
   const userID = req.userId;
-  const { senderWallet, amount, receiveWallet, sponsorID } = req.body;
+  const { senderWallet, amount, receiveWallet, sponsorID, walletType } =
+    req.body;
   //   console.log("addDepositHistory", senderWallet, amount, receiveWallet);
   try {
     const user = await User.findOne({ userID });
@@ -58,6 +59,7 @@ const addWithdrawHistory = async (req, res) => {
       user: user._id,
       userID: user.userID,
       mode: "Withdraw",
+      walletType,
       sponsorID,
       senderWallet,
       receiveWallet,
@@ -185,41 +187,87 @@ const updatePaymentStatus = async (req, res) => {
       if (method.toLowerCase() === "withdraw") {
         // const amountToDeduct =
         //   updatePayment.amount - updatePayment.amount * 0.1; // 10% extra cut
-        const updatedUser = await User.findOneAndUpdate(
-          {
-            sponsorID: updatePayment.sponsorID,
-            walletEarning: { $gte: updatePayment.amount },
-          },
-          { $inc: { walletEarning: -updatePayment.amount } },
-          { new: true }
-        );
+        if (updatePayment.walletType === "royaltyWallet") {
+          const royalty = await RoyaltyAmountStatus.find({
+            userIds: updatePayment.user,
+            status: "unpaid",
+            createdAt: {
+              $not: {
+                $gte: monthStart,
+                $lt: monthEnd,
+              },
+            },
+          });
+          const totalRoyalty = royalty.reduce((sum, item) => {
+            return sum + (item.amount || 0);
+          }, 0);
 
-        if (!updatedUser) {
-          return res.status(422).json({
-            success: false,
-            message:
-              "Insufficient balance in walletTeamEarn or user not found.",
+          const updatedUser = await User.findOneAndUpdate(
+            {
+              sponsorID: updatePayment.sponsorID,
+              walletEarning: { $gte: totalRoyalty },
+            },
+            { $inc: { walletEarning: -totalRoyalty } },
+            { new: true }
+          );
+
+          if (!updatedUser) {
+            return res.status(422).json({
+              success: false,
+              message:
+                "Insufficient balance in walletTeamEarn or user not found.",
+            });
+          }
+
+          await adminChargeModel.create({
+            userId: updatedUser._id,
+            withdrawAmount: updatePayment.amount,
+            adminCharge: updatePayment.amount * 0.1,
+          });
+
+          for (const doc of royalty) {
+            doc.status = "paid";
+            // koi aur fields bhi update kar sakte ho yahan
+            await doc.save();
+            // updatedRoyalty.push(doc); // push updated doc to array
+          }
+        } else {
+          const updatedUser = await User.findOneAndUpdate(
+            {
+              sponsorID: updatePayment.sponsorID,
+              walletEarning: { $gte: updatePayment.amount },
+            },
+            { $inc: { walletEarning: -updatePayment.amount } },
+            { new: true }
+          );
+
+          if (!updatedUser) {
+            return res.status(422).json({
+              success: false,
+              message:
+                "Insufficient balance in walletTeamEarn or user not found.",
+            });
+          }
+
+          await adminChargeModel.create({
+            userId: updatedUser._id,
+            withdrawAmount: updatePayment.amount,
+            adminCharge: updatePayment.amount * 0.1,
           });
         }
-
-        await adminChargeModel.create({
-          userId: updatedUser._id,
-          withdrawAmount: updatePayment.amount,
-          adminCharge: updatePayment.amount * 0.1,
-        });
       }
-    }
 
-    // ✅ 2. Update document
-    const updatedPayment = await PaymentHistoryModel.findByIdAndUpdate(
-      id,
-      { verficationStatus: status },
-      { new: true } // return updated doc
-    );
+      // ✅ 2. Update document
+      const updatedPayment = await PaymentHistoryModel.findByIdAndUpdate(
+        id,
+        { verficationStatus: status },
+        { new: true } // return updated doc
+      );
 
-    // ✅ 3. Check if payment exists
-    if (!updatedPayment) {
-      return res.status(404).json({ message: "Payment not found" });
+      // ✅ 3. Check if payment exists
+      if (!updatedPayment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
     }
 
     res.json({
