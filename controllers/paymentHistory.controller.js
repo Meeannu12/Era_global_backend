@@ -459,12 +459,6 @@ const getWalletDetails = async (req, res) => {
     const royalty = await RoyaltyAmountStatus.find({
       userIds: user._id,
       status: "unpaid",
-      createdAt: {
-        $not: {
-          $gte: monthStart,
-          $lt: monthEnd,
-        },
-      },
     });
 
     const totalRoyalty = royalty.reduce((sum, item) => {
