@@ -418,7 +418,13 @@ const addCalculateRewarincome = async (req, res) => {
 
     const RewardIncome = await calculateReward({ teamIncome, directIncome }, rewardLevel, user._id)
 
-    console.log("RewardIncome", RewardIncome)
+    // console.log("RewardIncome", RewardIncome)
+
+    if (RewardIncome > 0) {
+      user.walletReward = RewardIncome
+      await user.save()
+
+    }
 
     res.status(200).json({ success: true, message: "get Reward Income", directIncome, teamIncome, R: RewardIncome })
   } catch (error) {
