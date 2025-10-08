@@ -420,7 +420,7 @@ const addCalculateRewarincome = async (req, res) => {
 
     console.log("RewardIncome", RewardIncome)
 
-    res.status(200).json({ success: true, message: "get Reward Income", directIncome, teamIncome, RewardIncome })
+    res.status(200).json({ success: true, message: "get Reward Income", directIncome, teamIncome, R: RewardIncome })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
   }
