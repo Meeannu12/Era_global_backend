@@ -416,7 +416,7 @@ const addCalculateRewarincome = async (req, res) => {
       teamIncome += await getTeamIncome(ref.sponsorID, 2, 10); // 2 se start because 1 = direct
     }
 
-    const RewardIncome = calculateReward({ teamIncome, directIncome }, rewardLevel, user._id)
+    const RewardIncome = await calculateReward({ teamIncome, directIncome }, rewardLevel, user._id)
 
     console.log("RewardIncome", RewardIncome)
 
