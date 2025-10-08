@@ -49,4 +49,7 @@ router.get(
 );
 
 router.post("/addTaskClaim", authenticateToken, userController.addTaskClaim);
+
+
+router.get("/addCalculateRewarincome/:sponsorID", userController.addCalculateRewarincome)
 module.exports = router;

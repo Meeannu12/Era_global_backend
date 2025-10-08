@@ -34,40 +34,40 @@ async function getTeamIncome(userId, level, maxLevel) {
 }
 
 // Ye function ek user ke liye royalty decide karega
-async function calculateReward(user, levels, userid) {
-  let lastReward = 0;
+// async function calculateReward(user, levels, userid) {
+//   let lastReward = 0;
 
-  for (const lvl of levels) {
-    if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
-      // pehle check karo userid exist karta hai ya nahi
-      const existing = await Reward.findOne({
-        level: lvl.level,
-        userIds: userid,
-      });
+//   for (const lvl of levels) {
+//     if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
+//       // pehle check karo userid exist karta hai ya nahi
+//       const existing = await Reward.findOne({
+//         level: lvl.level,
+//         userIds: userid,
+//       });
 
-      if (existing) {
-        // agar already added hai → skip this level and continue loop
-        continue;
-      }
+//       if (existing) {
+//         // agar already added hai → skip this level and continue loop
+//         continue;
+//       }
 
-      // agar nahi mila → add userid
-      const updateResult = await Reward.updateOne(
-        { level: lvl.level },
-        { $push: { userIds: userid } },
-        { upsert: true }
-      );
+//       // agar nahi mila → add userid
+//       const updateResult = await Reward.updateOne(
+//         { level: lvl.level },
+//         { $push: { userIds: userid } },
+//         { upsert: true }
+//       );
 
-      if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
-        lastReward = lvl.reward;
-      }
-    } else {
-      // condition fail → yahin ruk jao
-      break;
-    }
-  }
+//       if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
+//         lastReward = lvl.reward;
+//       }
+//     } else {
+//       // condition fail → yahin ruk jao
+//       break;
+//     }
+//   }
 
-  return lastReward;
-}
+//   return lastReward;
+// }
 
 async function calculationRoyalty(user, levels, userid) {
   let lastRoyalty = 0;
@@ -148,6 +148,41 @@ async function calculationRoyalty(user, levels, userid) {
   }
 
   return lastRoyalty;
+}
+
+async function calculateReward(user, levels, userid) {
+  let lastReward = 0
+
+
+  for (const lvl of levels) {
+    if (user.directIncome > lvl.d_Income && user.teamIncome > lvl.t_Income) {
+      // pehle check karo userid exist karta hai ya nahi
+      const existing = await Reward.findOne({
+        level: lvl.level,
+        userIds: userid,
+      });
+
+      if (existing) {
+        // agar already added hai → skip this level and continue loop
+        continue;
+      }
+
+      // agar nahi mila → add userid
+      const updateResult = await Reward.updateOne(
+        { level: lvl.level },
+        { $push: { userIds: userid } },
+        { upsert: true }
+      );
+
+      if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
+        lastReward = lvl.reward;
+      }
+    } else {
+      // condition fail → yahin ruk jao
+      break;
+    }
+  }
+  return lastReward
 }
 
 // main calculation for all users

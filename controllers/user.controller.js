@@ -400,6 +400,33 @@ const addTaskClaim = async (req, res) => {
 };
 
 
+const addCalculateRewarincome = async (req, res) => {
+  const sponsorID = req.params.sponsorID;
+  try {
+    const user = await User.findOne({ sponsorID });
+    const directRefs = await User.find({ referredBy: user.sponsorID }); // cick first user
+    // direct income = apna deposit + direct refs ka deposit
+    const directIncome =
+      user.walletDeposit +
+      directRefs.reduce((sum, ref) => sum + ref.walletDeposit, 0);
+
+    // team income (level 2 se 10 tak)
+    let teamIncome = 0;
+    for (const ref of directRefs) {
+      teamIncome += await getTeamIncome(ref.sponsorID, 2, 10); // 2 se start because 1 = direct
+    }
+
+    const RewardIncome = calculateReward({ teamIncome, directIncome }, rewardLevel, user._id)
+
+    console.log("RewardIncome", RewardIncome)
+
+    res.status(200).json({ success: true, message: "get Reward Income", directIncome, teamIncome, RewardIncome })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+
 
 module.exports = {
   getUser,
@@ -412,4 +439,5 @@ module.exports = {
   addWalletAddress,
   getTeamIncomFindByUser,
   addTaskClaim,
+  addCalculateRewarincome,
 };
