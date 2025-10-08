@@ -18,7 +18,7 @@ const rewardLevel = [
   { d_Income: 300, level: 1, t_Income: 300, reward: 0, royalty: 10 },
   { d_Income: 350, level: 2, t_Income: 700, reward: 50, royalty: 50 },
   { d_Income: 500, level: 3, t_Income: 2000, reward: 100, royalty: 100 },
-  { d_Income: 600, level: 4, t_Income: 700, reward: 600, royalty: 300 },
+  { d_Income: 600, level: 4, t_Income: 7000, reward: 600, royalty: 300 },
   { d_Income: 1000, level: 5, t_Income: 22000, reward: 1100, royalty: 600 },
   { d_Income: 2000, level: 6, t_Income: 55000, reward: 3300, royalty: 1100 },
   { d_Income: 3000, level: 7, t_Income: 110000, reward: 10000, royalty: 2500 },
