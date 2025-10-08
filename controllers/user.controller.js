@@ -421,7 +421,7 @@ const addCalculateRewarincome = async (req, res) => {
     // console.log("RewardIncome", RewardIncome)
 
     if (RewardIncome > 0) {
-      user.walletReward = RewardIncome
+      user.walletReward += RewardIncome
       await user.save()
 
     }

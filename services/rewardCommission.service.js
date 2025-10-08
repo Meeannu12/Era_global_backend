@@ -155,7 +155,7 @@ async function calculateReward(user, levels, userid) {
 
 
   for (const lvl of levels) {
-    if (user.directIncome > lvl.d_Income && user.teamIncome > lvl.t_Income) {
+    if (user.directIncome >= lvl.d_Income && user.teamIncome >= lvl.t_Income) {
       // pehle check karo userid exist karta hai ya nahi
       const existing = await Reward.findOne({
         level: lvl.level,
@@ -175,7 +175,7 @@ async function calculateReward(user, levels, userid) {
       );
 
       if (updateResult.modifiedCount > 0 || updateResult.upsertedCount > 0) {
-        lastReward = lvl.reward;
+        lastReward += lvl.reward;
       }
     } else {
       // condition fail → yahin ruk jao
