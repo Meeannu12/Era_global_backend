@@ -306,49 +306,49 @@ const getTeamIncomFindByUser = async (req, res) => {
     }
 
     // Reward check
-    const reward = await calculateReward(
-      { directIncome, teamIncome },
-      rewardLevel,
-      user._id
-    );
+    // const reward = await calculateReward(
+    //   { directIncome, teamIncome },
+    //   rewardLevel,
+    //   user._id
+    // );
 
-    const royalty = await calculationRoyalty(
-      { directIncome, teamIncome },
-      rewardLevel,
-      user._id
-    );
+    // const royalty = await calculationRoyalty(
+    //   { directIncome, teamIncome },
+    //   rewardLevel,
+    //   user._id
+    // );
 
     // const newWallet = royalty + reward;
-    if (royalty > 0) {
-      user.walletRoyalty = royalty;
-    }
-    user.walletReward += reward;
-    user.walletEarning += reward;
-    await user.save();
+    // if (royalty > 0) {
+    //   user.walletRoyalty = royalty;
+    // }
+    // user.walletReward += reward;
+    // user.walletEarning += reward;
+    // await user.save();
 
-    if (reward > 0) {
-      const addRewardCommission = new CommissionModel({
-        userId: user._id, // referrer (receiver)
-        fromUserId: null,
-        level: 0, // 1..10
-        text: "Reward",
-        amount: reward,
-        date: new Date(), // the “earning day”
-      });
-      await addRewardCommission.save();
-    }
+    // if (reward > 0) {
+    //   const addRewardCommission = new CommissionModel({
+    //     userId: user._id, // referrer (receiver)
+    //     fromUserId: null,
+    //     level: 0, // 1..10
+    //     text: "Reward",
+    //     amount: reward,
+    //     date: new Date(), // the “earning day”
+    //   });
+    //   await addRewardCommission.save();
+    // }
 
-    if (royalty > 0) {
-      const addRewardCommission = new CommissionModel({
-        userId: user._id, // referrer (receiver)
-        fromUserId: null,
-        level: 0, // 1..10
-        text: "royalty",
-        amount: royalty,
-        date: new Date(), // the “earning day”
-      });
-      await addRewardCommission.save();
-    }
+    // if (royalty > 0) {
+    //   const addRewardCommission = new CommissionModel({
+    //     userId: user._id, // referrer (receiver)
+    //     fromUserId: null,
+    //     level: 0, // 1..10
+    //     text: "royalty",
+    //     amount: royalty,
+    //     date: new Date(), // the “earning day”
+    //   });
+    //   await addRewardCommission.save();
+    // }
 
     res.status(201).json({
       success: true,
