@@ -422,7 +422,19 @@ const addCalculateRewarincome = async (req, res) => {
 
     if (RewardIncome > 0) {
       user.walletReward += RewardIncome
+      user.walletEarning += RewardIncome
       await user.save()
+
+
+      const addRewardCommission = new CommissionModel({
+        userId: user._id, // referrer (receiver)
+        fromUserId: null,
+        level: 0, // 1..10
+        text: "Reward",
+        amount: RewardIncome,
+        date: new Date(), // the “earning day”
+      });
+      await addRewardCommission.save();
 
     }
 
