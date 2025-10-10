@@ -507,7 +507,7 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
       lastHistory.status = "unpaid";
       await lastHistory.save();
 
-      await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: diff }, $inc: { totalEarning: currentRoyalty } });
+      await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: diff }, $inc: { totalEarning: diff } });
 
       return { message: "Upgraded in same month", added: diff };
     }
