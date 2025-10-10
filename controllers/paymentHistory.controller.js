@@ -4,7 +4,7 @@ const { findById } = require("../models/level.model");
 // const paymentHistoryModel = require("../models/paymentHistory.model");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
 const Pin = require("../models/pin.model");
-const { RoyaltyAmountStatus } = require("../models/royalty.model");
+// const { RoyaltyAmountStatus } = require("../models/royalty.model");
 const User = require("../models/user.model");
 
 const moment = require("moment");
@@ -432,19 +432,19 @@ const getWalletDetails = async (req, res) => {
     const EarningCommission = await CommissionModel.find({ userId: user._id });
 
     // get total commission Earning
-    const totalAmount = EarningCommission.reduce((sum, item) => {
-      return sum + (item.amount || 0);
-    }, 0);
+    // const totalAmount = EarningCommission.reduce((sum, item) => {
+    //   return sum + (item.amount || 0);
+    // }, 0);
 
     // 4. Sirf current month ki entries filter karo
-    const currentMonthEarnings = EarningCommission.filter((item) => {
-      return moment(item.date).isBetween(monthStart, monthEnd, null, "[]");
-    });
+    // const currentMonthEarnings = EarningCommission.filter((item) => {
+    //   return moment(item.date).isBetween(monthStart, monthEnd, null, "[]");
+    // });
 
     // 5. Current month earning ka sum
-    const currentMonthTotal = currentMonthEarnings.reduce((sum, item) => {
-      return sum + (item.amount || 0);
-    }, 0);
+    // const currentMonthTotal = currentMonthEarnings.reduce((sum, item) => {
+    //   return sum + (item.amount || 0);
+    // }, 0);
 
     const withDrawal = await PaymentHistoryModel.find({
       user: user._id,
@@ -456,42 +456,42 @@ const getWalletDetails = async (req, res) => {
       return sum + (parseInt(item.amount) || 0);
     }, 0);
 
-    const royalty = await RoyaltyAmountStatus.find({
-      userIds: user._id,
-      status: "unpaid",
-    });
+    // const royalty = await RoyaltyAmountStatus.find({
+    //   userIds: user._id,
+    //   status: "unpaid",
+    // });
 
-    const previousRoyalty = await RoyaltyAmountStatus.find({
-      userIds: user._id,
-      status: "unpaid",
-      createdAt: {
-        $not: {
-          $gte: monthStart,
-          $lt: monthEnd,
-        },
-      },
-    });
+    // const previousRoyalty = await RoyaltyAmountStatus.find({
+    //   userIds: user._id,
+    //   status: "unpaid",
+    //   createdAt: {
+    //     $not: {
+    //       $gte: monthStart,
+    //       $lt: monthEnd,
+    //     },
+    //   },
+    // });
 
-    const totalRoyalty = royalty.reduce((sum, item) => {
-      return sum + (item.amount || 0);
-    }, 0);
+    // const totalRoyalty = royalty.reduce((sum, item) => {
+    //   return sum + (item.amount || 0);
+    // }, 0);
 
-    const totalPreviourRoyalty = previousRoyalty.reduce((sum, item) => {
-      return sum + (item.amount || 0);
-    }, 0);
+    // const totalPreviourRoyalty = previousRoyalty.reduce((sum, item) => {
+    //   return sum + (item.amount || 0);
+    // }, 0);
 
-    const Datalist = {
-      totalAmount,
-      currentMonthTotal,
-      totalWithDrawal,
-      totalRoyalty,
-      totalPreviourRoyalty,
-    };
+    // const Datalist = {
+    //   totalAmount,
+    //   currentMonthTotal,
+    //   totalWithDrawal,
+    //   totalRoyalty,
+    //   totalPreviourRoyalty,
+    // };
 
     res.status(201).json({
       success: true,
       message: "user Amount get Sections",
-      Datalist,
+      totalWithDrawal,
     });
   } catch (error) {
     res.status(500).json({
