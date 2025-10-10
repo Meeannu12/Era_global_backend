@@ -10,7 +10,9 @@ const {
   getReferralCountByEachLevel,
 } = require("../services/user.service");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
-const { RoyaltyAmountStatus, default: RoyaltyHistory } = require("../models/royalty.model");
+const RoyaltyHistory = require("../models/royalty.model");
+
+
 
 
 
