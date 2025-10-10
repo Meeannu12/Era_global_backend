@@ -8,7 +8,7 @@ const royaltyHistorySchema = new mongoose.Schema({
   levelIncome: { type: Number, default: 0 },
   status: {
     type: String,
-    enum: ["uppaid", "paid"],
+    enum: ["unpaid", "paid"],
     default: "unpaid"
   },
 
