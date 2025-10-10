@@ -12,8 +12,8 @@ const royaltyHistorySchema = new mongoose.Schema({
     default: "unpaid"
   },
 
-  previousReward: { type: Number, default: 0 }, // pichla milestone reward
-  newReward: { type: Number, default: 0 }, // abhi achieve hua
+  previousRoyalty: { type: Number, default: 0 }, // pichla milestone reward
+  newRoyalty: { type: Number, default: 0 }, // abhi achieve hua
   creditedAmount: { type: Number, default: 0 }, // difference jo wallet me gaya
 
   type: {

@@ -428,6 +428,7 @@ const addCalculateRewarincome = async (req, res) => {
     if (RewardIncome > 0) {
       user.walletReward += RewardIncome
       user.walletEarning += RewardIncome
+      user.totalEarning += RewardIncome
       await user.save()
 
 
@@ -462,51 +463,51 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
     .find((l) => directIncome >= l.d_Income && teamIncome >= l.t_Income);
 
   if (!matchedLevel) {
-    return { message: "No reward level matched yet" };
+    return { message: "No Royalty level matched yet" };
   }
 
   const { royalty: currentRoyalty, level: currentLevel } = matchedLevel;
 
-  // Step 2: Find last reward entry of user
+  // Step 2: Find last royalty entry of user
   const lastHistory = await RoyaltyHistory.findOne({ userId }).sort({ createdAt: -1 });
 
-  // 🆕 CASE 1: First reward ever
+  // 🆕 CASE 1: First royalty ever
   if (!lastHistory) {
     const newHistory = await RoyaltyHistory.create({
       userId,
       month: currentMonth,
       directIncome,
       levelIncome: teamIncome,
-      previousReward: 0,
-      newReward: currentRoyalty,
+      previousRoyalty: 0,
+      newRoyalty: currentRoyalty,
       creditedAmount: currentRoyalty,
       status: "unpaid",
       type: "new",
       levelAchieved: currentLevel,
     });
 
-    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty } });
-    return { message: "First reward credited", added: currentRoyalty };
+    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: { totalEarning: currentRoyalty } });
+    return { message: "First royalty credited", added: currentRoyalty };
   }
 
   // 🕐 CASE 2: Same month (check for upgrade)
   if (lastHistory.month === currentMonth) {
-    if (currentRoyalty === lastHistory.newReward) {
+    if (currentRoyalty === lastHistory.newRoyalty) {
       return { message: "Already credited for this level" };
     }
 
-    if (currentRoyalty > lastHistory.newReward) {
-      const diff = currentRoyalty - lastHistory.newReward;
+    if (currentRoyalty > lastHistory.newRoyalty) {
+      const diff = currentRoyalty - lastHistory.newRoyalty;
 
-      lastHistory.previousReward = lastHistory.newReward;
-      lastHistory.newReward = currentRoyalty;
+      lastHistory.previousRoyalty = lastHistory.newRoyalty;
+      lastHistory.newRoyalty = currentRoyalty;
       lastHistory.creditedAmount = diff;
       lastHistory.levelAchieved = currentLevel;
       lastHistory.type = "upgrade";
       lastHistory.status = "unpaid";
       await lastHistory.save();
 
-      await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: diff } });
+      await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: diff }, $inc: { totalEarning: currentRoyalty } });
 
       return { message: "Upgraded in same month", added: diff };
     }
@@ -514,23 +515,23 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
     return { message: "No upgrade this month" };
   }
 
-  // 📅 CASE 3: New month (new entry, full reward)
+  // 📅 CASE 3: New month (new entry, full royalty)
   if (lastHistory.month !== currentMonth) {
     const newHistory = await RoyaltyHistory.create({
       userId,
       month: currentMonth,
       directIncome,
       levelIncome: teamIncome,
-      previousReward: lastHistory.newReward,
-      newReward: currentRoyalty,
+      previousRoyalty: lastHistory.newRoyalty,
+      newRoyalty: currentRoyalty,
       creditedAmount: currentRoyalty,
       status: "unpaid",
       type: "new",
       levelAchieved: currentLevel,
     });
 
-    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty } });
-    return { message: "New month reward credited", added: currentRoyalty };
+    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: { totalEarning: currentRoyalty } });
+    return { message: "New month royalty credited", added: currentRoyalty };
   }
 
   return { message: "No changes" };

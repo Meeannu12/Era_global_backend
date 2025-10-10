@@ -44,6 +44,7 @@ async function selfEarning() {
 
       user.walletSelfEarn += amountToAdd;
       user.walletEarning += amountToAdd;
+      user.totalEarning += amountToAdd
       user.lastCreditedDate = today;
 
       if (amountToAdd > 0) {
