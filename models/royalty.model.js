@@ -1,53 +1,31 @@
 const mongoose = require("mongoose");
 
-const RoyaltySchema = new mongoose.Schema(
-  {
-    level: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
-    userRoyalty: [
-      {
-        userIds: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User", // <-- User collection ka reference
-        },
-        date: { type: Date, default: Date.now },
-      },
-    ],
+const royaltyHistorySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+
+  month: { type: String, required: true }, // "YYYY-MM"
+  directIncome: { type: Number, default: 0 },
+  levelIncome: { type: Number, default: 0 },
+  status: {
+    type: String,
+    enum: ["uppaid", "paid"],
+    default: "unpaid"
   },
-  { timestamps: true }
-);
 
-const Royalty = mongoose.model("Royalty", RoyaltySchema);
+  previousReward: { type: Number, default: 0 }, // pichla milestone reward
+  newReward: { type: Number, default: 0 }, // abhi achieve hua
+  creditedAmount: { type: Number, default: 0 }, // difference jo wallet me gaya
 
-const RoyaltyAmountStatusSchema = new mongoose.Schema(
-  {
-    userIds: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // <-- User collection ka reference
-    },
-    status: {
-      type: String,
-      default: "unpaid",
-    },
-    amount: {
-      type: Number,
-      default: 0,
-    },
-    level: {
-      type: Number,
-      default: 0,
-    },
-    date: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
-);
+  type: {
+    type: String,
+    enum: ["new", "upgrade"],
+    default: "new"
+  }, // new month entry ya upgrade in same month
 
-const RoyaltyAmountStatus = mongoose.model(
-  "RoyaltyAmountStatus",
-  RoyaltyAmountStatusSchema
-);
+  levelAchieved: { type: Number, default: 0 }, // (optional) which MLM level reached
+}, { timestamps: true });
 
-module.exports = { Royalty, RoyaltyAmountStatus };
+
+const RoyaltyHistory = mongoose.model("RoyaltyHistory", royaltyHistorySchema);
+
+module.exports = RoyaltyHistory;

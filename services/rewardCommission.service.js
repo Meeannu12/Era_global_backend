@@ -1,7 +1,6 @@
 const moment = require("moment");
 const commissionModel = require("../models/commission.model");
 const Reward = require("../models/reward.model");
-const { Royalty, RoyaltyAmountStatus } = require("../models/royalty.model");
 const User = require("../models/user.model");
 
 const now = new Date();
@@ -246,6 +245,7 @@ async function calculateRewardIncomes() {
     // console.log("---------------------------");
   }
 }
+
 
 module.exports = {
   calculateRewardIncomes,
