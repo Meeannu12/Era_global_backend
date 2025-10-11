@@ -6,6 +6,7 @@ const AdminChargeSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    sponsorID: String,
     withdrawAmount: Number,
     adminCharge: Number,
   },

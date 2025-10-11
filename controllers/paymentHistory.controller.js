@@ -4,6 +4,7 @@ const { findById } = require("../models/level.model");
 // const paymentHistoryModel = require("../models/paymentHistory.model");
 const PaymentHistoryModel = require("../models/paymentHistory.model");
 const Pin = require("../models/pin.model");
+const RoyaltyHistory = require("../models/royalty.model");
 // const { RoyaltyAmountStatus } = require("../models/royalty.model");
 const User = require("../models/user.model");
 
@@ -55,17 +56,39 @@ const addWithdrawHistory = async (req, res) => {
   try {
     const user = await User.findOne({ userID });
 
-    const addWithdraw = new PaymentHistoryModel({
-      user: user._id,
-      userID: user.userID,
-      mode: "Withdraw",
-      walletType,
-      sponsorID,
-      senderWallet,
-      receiveWallet,
-      amount,
-    });
-    await addWithdraw.save();
+
+    // check wallet type
+    if (walletType == "royaltyWallet") {
+
+      const getRoyaltyAmount = await RoyaltyHistory.findById(amount)
+      const addWithdraw = new PaymentHistoryModel({
+        user: user._id,
+        userID: user.userID,
+        mode: "Withdraw",
+        walletType,
+        sponsorID,
+        senderWallet,
+        receiveWallet,
+        previousRoyaltyID: getRoyaltyAmount._id,
+        amount: getRoyaltyAmount.creditedAmount,
+      });
+      await addWithdraw.save();
+
+    } else {
+      const addWithdraw = new PaymentHistoryModel({
+        user: user._id,
+        userID: user.userID,
+        mode: "Withdraw",
+        walletType,
+        sponsorID,
+        senderWallet,
+        receiveWallet,
+        amount,
+      });
+      await addWithdraw.save();
+    }
+
+
 
     // console.log("user Data recived from DB", user);
     res.status(201).json({
@@ -149,7 +172,7 @@ const getDeposit = async (req, res) => {
 };
 
 // Allowed statuses
-const ALLOWED_STATUSES = ["Unverified", "Verified", "Rejected"];
+const ALLOWED_STATUSES = ["Verified", "Rejected"];
 
 const updatePaymentStatus = async (req, res) => {
   const { status, method } = req.body;
@@ -187,27 +210,16 @@ const updatePaymentStatus = async (req, res) => {
       if (method.toLowerCase() === "withdraw") {
         // const amountToDeduct =
         //   updatePayment.amount - updatePayment.amount * 0.1; // 10% extra cut
+        const amount = Number(updatePayment.amount)
         if (updatePayment.walletType === "royaltyWallet") {
-          const royalty = await RoyaltyAmountStatus.find({
-            userIds: updatePayment.user,
-            status: "unpaid",
-            createdAt: {
-              $not: {
-                $gte: monthStart,
-                $lt: monthEnd,
-              },
-            },
-          });
-          const totalRoyalty = royalty.reduce((sum, item) => {
-            return sum + (item.amount || 0);
-          }, 0);
+          await RoyaltyHistory.findByIdAndUpdate(updatePayment.previousRoyaltyID, { $set: { status: "paid" } })
 
           const updatedUser = await User.findOneAndUpdate(
             {
               sponsorID: updatePayment.sponsorID,
-              walletEarning: { $gte: totalRoyalty },
+              walletEarning: { $gte: amount },
             },
-            { $inc: { walletEarning: -totalRoyalty } },
+            { $inc: { walletEarning: -amount } },
             { new: true }
           );
 
@@ -221,23 +233,17 @@ const updatePaymentStatus = async (req, res) => {
 
           await adminChargeModel.create({
             userId: updatedUser._id,
+            sponsorID: updatedUser.sponsorID,
             withdrawAmount: updatePayment.amount,
             adminCharge: updatePayment.amount * 0.1,
           });
-
-          for (const doc of royalty) {
-            doc.status = "paid";
-            // koi aur fields bhi update kar sakte ho yahan
-            await doc.save();
-            // updatedRoyalty.push(doc); // push updated doc to array
-          }
         } else {
           const updatedUser = await User.findOneAndUpdate(
             {
               sponsorID: updatePayment.sponsorID,
-              walletEarning: { $gte: updatePayment.amount },
+              walletEarning: { $gte: amount },
             },
-            { $inc: { walletEarning: -updatePayment.amount } },
+            { $inc: { walletEarning: - amount } },
             { new: true }
           );
 
@@ -251,6 +257,7 @@ const updatePaymentStatus = async (req, res) => {
 
           await adminChargeModel.create({
             userId: updatedUser._id,
+            sponsorID: updatedUser.sponsorID,
             withdrawAmount: updatePayment.amount,
             adminCharge: updatePayment.amount * 0.1,
           });
@@ -264,7 +271,7 @@ const updatePaymentStatus = async (req, res) => {
         { new: true } // return updated doc
       );
 
-      // ✅ 3. Check if payment exists
+      // ✅ 3. Check if payment not exists
       if (!updatedPayment) {
         return res.status(404).json({ message: "Payment not found" });
       }
@@ -429,22 +436,9 @@ const getWalletDetails = async (req, res) => {
   try {
     const user = await User.findOne({ userID });
 
-    const EarningCommission = await CommissionModel.find({ userId: user._id });
+    const currentMonth = moment().format("YYYY-MM");
+    const getUnpaidRoyalty = await RoyaltyHistory.find({ month: { $ne: currentMonth }, userId: user._id, status: "unpaid" }, { creditedAmount: 1, month: 1 });
 
-    // get total commission Earning
-    // const totalAmount = EarningCommission.reduce((sum, item) => {
-    //   return sum + (item.amount || 0);
-    // }, 0);
-
-    // 4. Sirf current month ki entries filter karo
-    // const currentMonthEarnings = EarningCommission.filter((item) => {
-    //   return moment(item.date).isBetween(monthStart, monthEnd, null, "[]");
-    // });
-
-    // 5. Current month earning ka sum
-    // const currentMonthTotal = currentMonthEarnings.reduce((sum, item) => {
-    //   return sum + (item.amount || 0);
-    // }, 0);
 
     const withDrawal = await PaymentHistoryModel.find({
       user: user._id,
@@ -456,42 +450,12 @@ const getWalletDetails = async (req, res) => {
       return sum + (parseInt(item.amount) || 0);
     }, 0);
 
-    // const royalty = await RoyaltyAmountStatus.find({
-    //   userIds: user._id,
-    //   status: "unpaid",
-    // });
-
-    // const previousRoyalty = await RoyaltyAmountStatus.find({
-    //   userIds: user._id,
-    //   status: "unpaid",
-    //   createdAt: {
-    //     $not: {
-    //       $gte: monthStart,
-    //       $lt: monthEnd,
-    //     },
-    //   },
-    // });
-
-    // const totalRoyalty = royalty.reduce((sum, item) => {
-    //   return sum + (item.amount || 0);
-    // }, 0);
-
-    // const totalPreviourRoyalty = previousRoyalty.reduce((sum, item) => {
-    //   return sum + (item.amount || 0);
-    // }, 0);
-
-    // const Datalist = {
-    //   totalAmount,
-    //   currentMonthTotal,
-    //   totalWithDrawal,
-    //   totalRoyalty,
-    //   totalPreviourRoyalty,
-    // };
 
     res.status(201).json({
       success: true,
       message: "user Amount get Sections",
       totalWithDrawal,
+      getUnpaidRoyalty
     });
   } catch (error) {
     res.status(500).json({

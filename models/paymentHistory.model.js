@@ -27,6 +27,9 @@ const paymentHistorySchema = new mongoose.Schema(
     // receiveName: {
     //   type: String,
     // },
+    previousRoyaltyID: {
+      type: String
+    },
     amount: {
       type: String,
     },

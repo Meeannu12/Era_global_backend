@@ -98,6 +98,7 @@ const login = async (req, res) => {
 
     const user = await User.findOne({ sponsorID: sponsorID });
 
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -167,6 +168,6 @@ const logout = async (req, res) => {
   }
 };
 
-const forgetPassword = async (req, res) => {};
+const forgetPassword = async (req, res) => { };
 
 module.exports = { login, register, logout };
