@@ -6,6 +6,9 @@ const authenticateToken = require("../middlewares/auth");
 
 router.get("/allUser", authenticateToken, userController.getAllUser)
 
+// download users Excel Sheet api
+router.get("/downloadUserDetails", userController.downloadUserDetails)
+
 
 router.get("/me", authenticateToken, userController.getUser);
 router.put("/edit-profile", authenticateToken, userController.editUserProfile);
@@ -56,4 +59,8 @@ router.post("/addTaskClaim", authenticateToken, userController.addTaskClaim);
 
 
 router.get("/addCalculateRewarincome/:sponsorID", userController.addCalculateRewarincome)
+
+
+
+
 module.exports = router;

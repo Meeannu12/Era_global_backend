@@ -1,6 +1,7 @@
 const CommissionModel = require("../models/commission.model");
 const User = require("../models/user.model");
 const { getTeamIncome } = require("../services/cron.service");
+const XLSX = require("xlsx")
 const {
   calculateReward,
   calculationRoyalty,
@@ -566,6 +567,33 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
 };
 
 
+const downloadUserDetails = async (req, res) => {
+  try {
+
+    const getUserDetails = await User.find({}).lean()
+    const worksheet = XLSX.utils.json_to_sheet(getUserDetails);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="EraGlobal_Users.xlsx"'
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.send(buffer);
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+
 
 
 
@@ -582,5 +610,6 @@ module.exports = {
   getTeamIncomFindByUser,
   addTaskClaim,
   addCalculateRewarincome,
-  getAllUser
+  getAllUser,
+  downloadUserDetails
 };
