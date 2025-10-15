@@ -7,7 +7,7 @@ const authenticateToken = require("../middlewares/auth");
 router.get("/allUser", authenticateToken, userController.getAllUser)
 
 // download users Excel Sheet api
-router.get("/downloadUserDetails", userController.downloadUserDetails)
+router.get("/downloadUserDetails", authenticateToken, userController.downloadUserDetails)
 
 
 router.get("/me", authenticateToken, userController.getUser);
