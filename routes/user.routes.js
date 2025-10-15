@@ -4,6 +4,9 @@ const router = express.Router();
 const userController = require("../controllers/user.controller");
 const authenticateToken = require("../middlewares/auth");
 
+router.get("/allUser", authenticateToken, userController.getAllUser)
+
+
 router.get("/me", authenticateToken, userController.getUser);
 router.put("/edit-profile", authenticateToken, userController.editUserProfile);
 router.put(
@@ -47,6 +50,7 @@ router.get(
   authenticateToken,
   userController.getTeamIncomFindByUser
 );
+
 
 router.post("/addTaskClaim", authenticateToken, userController.addTaskClaim);
 

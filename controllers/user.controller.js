@@ -212,6 +212,34 @@ const getUsersBySponsorID = async (req, res) => {
   }
 };
 
+
+const getAllUser = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 20
+
+    const skip = (page - 1) * limit;
+    const newUser = await User.find({})
+      .skip(skip)
+      .limit(limit)
+      .sort({ username: 1 }); // optional: sort newest first
+
+    const totalUsers = await User.countDocuments();
+    res.status(200).json({
+      success: true, message: "All Users Details",
+      page,
+      limit,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      users: newUser,
+    })
+
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
 // add wallet address using this api
 const addWalletAddress = async (req, res) => {
   try {
@@ -554,4 +582,5 @@ module.exports = {
   getTeamIncomFindByUser,
   addTaskClaim,
   addCalculateRewarincome,
+  getAllUser
 };
