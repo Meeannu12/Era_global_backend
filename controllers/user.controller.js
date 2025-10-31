@@ -595,6 +595,64 @@ const downloadUserDetails = async (req, res) => {
 
 
 
+//get level user income detaisl
+
+const downloadUserIncomeReport = async (req, res) => {
+  try {
+    const user = await User.findOne({ userID: req.userId });
+    const getCommissionDetails = await CommissionModel.find({ userId: user._id }).lean()
+
+
+    // Group by date
+    const grouped = {};
+
+    getCommissionDetails.forEach(item => {
+      const dateKey = item.date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = { selfIncome: 0, levelIncome: 0 };
+      }
+
+      if (item.level === 0) {
+        grouped[dateKey].selfIncome += item.amount;
+      } else if (item.level >= 1) {
+        grouped[dateKey].levelIncome += item.amount;
+      }
+    });
+
+    // Convert grouped data to array for display or Excel export
+    const result = Object.entries(grouped).map(([date, values], index) => ({
+      "S.No": index + 1,
+      "Date": date,
+      "Self Income": values.selfIncome,
+      "Level Income": values.levelIncome,
+      "Total Income": values.selfIncome + values.levelIncome
+    }));
+
+
+    const worksheet = XLSX.utils.json_to_sheet(result);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="EraGlobal_Users.xlsx"'
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.send(buffer);
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+
+
 
 
 
@@ -611,5 +669,6 @@ module.exports = {
   addTaskClaim,
   addCalculateRewarincome,
   getAllUser,
-  downloadUserDetails
+  downloadUserDetails,
+  downloadUserIncomeReport
 };

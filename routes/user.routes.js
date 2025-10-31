@@ -8,6 +8,7 @@ router.get("/allUser", authenticateToken, userController.getAllUser)
 
 // download users Excel Sheet api
 router.get("/downloadUserDetails", authenticateToken, userController.downloadUserDetails)
+router.get("/downloadUserIncomeReport", authenticateToken, userController.downloadUserIncomeReport)
 
 
 router.get("/me", authenticateToken, userController.getUser);
