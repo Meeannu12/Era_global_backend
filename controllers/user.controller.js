@@ -607,7 +607,7 @@ const downloadUserIncomeReport = async (req, res) => {
     const grouped = {};
 
     getCommissionDetails.forEach(item => {
-      const dateKey = item.date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+      const dateKey = item.createdAt.toISOString().split('T')[0]; // Format YYYY-MM-DD
       if (!grouped[dateKey]) {
         grouped[dateKey] = { selfIncome: 0, levelIncome: 0 };
       }
