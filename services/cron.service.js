@@ -78,16 +78,16 @@ async function calculateIncomes() {
     user.walletEarning += royalty;
     await user.save();
 
-    const addRoyaltyCommission = new CommissionModel({
-      userId: user._id, // referrer (receiver)
-      fromUserId: null,
-      level: 0, // 1..10
-      text: "Royalty",
-      amount: royalty,
-      date: new Date(), // the “earning day”
-    });
+    // const addRoyaltyCommission = new CommissionModel({
+    //   userId: user._id, // referrer (receiver)
+    //   fromUserId: null,
+    //   level: 0, // 1..10
+    //   text: "Royalty",
+    //   amount: royalty,
+    //   date: new Date(), // the “earning day”
+    // });
 
-    await addRoyaltyCommission.save();
+    // await addRoyaltyCommission.save();
 
     // console.log(`User: ${user.sponsorID}`);
     // console.log(`Direct Income: ${directIncome}`);

@@ -227,15 +227,15 @@ async function calculateRewardIncomes() {
     await user.save();
 
     if (reward > 0) {
-      const addRewardCommission = new commissionModel({
-        userId: user._id, // referrer (receiver)
-        fromUserId: null,
-        level: 0, // 1..10
-        text: "Reward",
-        amount: reward,
-        date: new Date(), // the “earning day”
-      });
-      await addRewardCommission.save();
+      // const addRewardCommission = new commissionModel({
+      //   userId: user._id, // referrer (receiver)
+      //   fromUserId: null,
+      //   level: 0, // 1..10
+      //   text: "Reward",
+      //   amount: reward,
+      //   date: new Date(), // the “earning day”
+      // });
+      // await addRewardCommission.save();
     }
 
     // console.log(`User: ${user.sponsorID}`);
