@@ -263,18 +263,19 @@ const updatePaymentStatus = async (req, res) => {
           });
         }
       }
+    }
 
-      // ✅ 2. Update document
-      const updatedPayment = await PaymentHistoryModel.findByIdAndUpdate(
-        id,
-        { verficationStatus: status },
-        { new: true } // return updated doc
-      );
 
-      // ✅ 3. Check if payment not exists
-      if (!updatedPayment) {
-        return res.status(404).json({ message: "Payment not found" });
-      }
+    // ✅ 2. Update document
+    const updatedPayment = await PaymentHistoryModel.findByIdAndUpdate(
+      id,
+      { verficationStatus: status },
+      { new: true } // return updated doc
+    );
+
+    // ✅ 3. Check if payment not exists
+    if (!updatedPayment) {
+      return res.status(404).json({ message: "Payment not found" });
     }
 
     res.json({
