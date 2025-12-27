@@ -402,7 +402,7 @@ const getTeamIncomFindByUser = async (req, res) => {
 
 const addTaskClaim = async (req, res) => {
   const userID = req.userId;
-  const { setClaimTime, walletClaim } = req.body;
+  const { setClaimTime } = req.body;
 
   try {
     const newUser = await User.findOne({ userID });
@@ -418,7 +418,7 @@ const addTaskClaim = async (req, res) => {
     }
 
     newUser.setClaimTime = setClaimTime;
-    newUser.walletClaim += walletClaim;
+    newUser.walletClaim += 0.22;
 
     await newUser.save();
     res
