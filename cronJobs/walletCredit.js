@@ -30,66 +30,69 @@ async function selfEarning() {
     for (const user of allUsers) {
       const maxLimit = user.walletDeposit * 5;
 
-      if (user.walletSelfEarn >= maxLimit) {
-        // console.log(`${user.username} ka limit reach ho gaya`);
-        continue; // skip credit
+      if (user.walletDeposit >= 15) {
+
+        if (user.walletSelfEarn >= maxLimit) {
+          // console.log(`${user.username} ka limit reach ho gaya`);
+          continue; // skip credit
+        }
+
+        const interest = user.walletDeposit * (0.25 / 100);
+        let amountToAdd = interest;
+
+        if (user.walletSelfEarn + interest > maxLimit) {
+          amountToAdd = maxLimit - user.walletSelfEarn;
+        }
+
+        user.walletSelfEarn += amountToAdd;
+        user.walletEarning += amountToAdd;
+        user.totalEarning += amountToAdd
+        user.lastCreditedDate = today;
+
+        if (amountToAdd > 0) {
+          await commissionModel.create({
+            userId: user._id,
+            amount: amountToAdd,
+            text: "Self Income",
+            level: 0,
+            date: today,
+          });
+        }
+
+        await user.save();
+
+        // if (amountToAdd > 0) {
+        //   bulkCommissionOps.push({
+        //     insertOne: {
+        //       document: {
+        //         userId: user._id,
+        //         amount: amountToAdd,
+        //         level: 0,
+        //         date: today,
+        //       },
+        //     },
+        //   });
+
+        //   bulkUserOps.push({
+        //     updateOne: {
+        //       filter: { _id: user._id },
+        //       update: {
+        //         $inc: { walletSelfEarn: amountToAdd },
+        //         $set: { lastCreditedDate: today },
+        //       },
+        //     },
+        //   });
+        // }
+
+        // if (bulkUserOps.length > 0) {
+        //   await User.bulkWrite(bulkUserOps);
+        // }
+        // if (bulkCommissionOps.length > 0) {
+        //   await commissionModel.bulkWrite(bulkCommissionOps);
+        // }
+
+        console.log(`Added ${amountToAdd} to ${user.username}`);
       }
-
-      const interest = user.walletDeposit * (0.25 / 100);
-      let amountToAdd = interest;
-
-      if (user.walletSelfEarn + interest > maxLimit) {
-        amountToAdd = maxLimit - user.walletSelfEarn;
-      }
-
-      user.walletSelfEarn += amountToAdd;
-      user.walletEarning += amountToAdd;
-      user.totalEarning += amountToAdd
-      user.lastCreditedDate = today;
-
-      if (amountToAdd > 0) {
-        await commissionModel.create({
-          userId: user._id,
-          amount: amountToAdd,
-          text: "Self Income",
-          level: 0,
-          date: today,
-        });
-      }
-
-      await user.save();
-
-      // if (amountToAdd > 0) {
-      //   bulkCommissionOps.push({
-      //     insertOne: {
-      //       document: {
-      //         userId: user._id,
-      //         amount: amountToAdd,
-      //         level: 0,
-      //         date: today,
-      //       },
-      //     },
-      //   });
-
-      //   bulkUserOps.push({
-      //     updateOne: {
-      //       filter: { _id: user._id },
-      //       update: {
-      //         $inc: { walletSelfEarn: amountToAdd },
-      //         $set: { lastCreditedDate: today },
-      //       },
-      //     },
-      //   });
-      // }
-
-      // if (bulkUserOps.length > 0) {
-      //   await User.bulkWrite(bulkUserOps);
-      // }
-      // if (bulkCommissionOps.length > 0) {
-      //   await commissionModel.bulkWrite(bulkCommissionOps);
-      // }
-
-      console.log(`Added ${amountToAdd} to ${user.username}`);
     }
   } catch (err) {
     console.error("Error in cron job:", err);
