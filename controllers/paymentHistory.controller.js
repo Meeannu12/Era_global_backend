@@ -227,7 +227,7 @@ const updatePaymentStatus = async (req, res) => {
             return res.status(422).json({
               success: false,
               message:
-                "Insufficient balance in walletTeamEarn or user not found.",
+                "Insufficient balance in royaltyWallet or user not found.",
             });
           }
 
