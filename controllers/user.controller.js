@@ -515,7 +515,7 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
       levelAchieved: currentLevel,
     });
 
-    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: { totalEarning: currentRoyalty } });
+    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: { walletEarning: currentRoyalty, totalEarning: currentRoyalty } });
     return { message: "First royalty credited", added: currentRoyalty };
   }
 
@@ -536,7 +536,7 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
       lastHistory.status = "unpaid";
       await lastHistory.save();
 
-      await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: diff }, $inc: { totalEarning: diff } });
+      await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: diff }, $inc: { walletEarning: currentRoyalty, totalEarning: diff } });
 
       return { message: "Upgraded in same month", added: diff };
     }
@@ -559,7 +559,7 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
       levelAchieved: currentLevel,
     });
 
-    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: { totalEarning: currentRoyalty } });
+    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: {walletEarning: currentRoyalty, totalEarning: currentRoyalty } });
     return { message: "New month royalty credited", added: currentRoyalty };
   }
 
