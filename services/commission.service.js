@@ -12,7 +12,7 @@ async function distributeCommission(userID, level = 1, maxLevel = 10) {
   const referrals = await User.find({ referredBy: userID.sponsorID });
 
   for (const ref of referrals) {
-    if (ref.walletDeposit >= 20) {
+    if (ref.walletDeposit >= 11) {
       const baseCommission = (ref.walletDeposit * 0.25) / 100;
       const levelPercent = levels[level - 1] || 0;
       const income = (baseCommission * levelPercent) / 100;
