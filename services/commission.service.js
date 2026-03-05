@@ -1,5 +1,5 @@
 const Commission = require("../models/commission.model");
-const Level = require("../models/level.model");
+// const Level = require("../models/level.model");
 const User = require("../models/user.model");
 
 const levels = [100, 0.5, 0.7, 1, 1.5, 1.75, 2, 2.25, 2.5, 3]; // Level percent
