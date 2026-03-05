@@ -173,22 +173,6 @@ const getUser = async (req, res) => {
       });
     }
 
-
-    const directRefs = await User.find({ referredBy: user.sponsorID }); // cick first user
-    // direct income = apna deposit + direct refs ka deposit
-    const directIncome =
-      user.walletDeposit +
-      directRefs.reduce((sum, ref) => sum + ref.walletDeposit, 0);
-
-    // team income (level 2 se 10 tak)
-    let teamIncome = 0;
-    for (const ref of directRefs) {
-      teamIncome += await getTeamIncome(ref.sponsorID, 2, 10); // 2 se start because 1 = direct
-    }
-
-
-    await calculateAndCreditRoyalty(user._id, directIncome, teamIncome)
-
     return res.status(200).json({
       success: true,
       message: "Get User Information Successfully",
@@ -353,7 +337,7 @@ const getTeamIncomFindByUser = async (req, res) => {
     }
 
 
-    // await calculateAndCreditRoyalty(user._id, directIncome, teamIncome)
+    await calculateAndCreditRoyalty(user._id, directIncome, teamIncome)
 
     // Reward check
     // const reward = await calculateReward(
@@ -575,7 +559,7 @@ const calculateAndCreditRoyalty = async (userId, directIncome, teamIncome) => {
       levelAchieved: currentLevel,
     });
 
-    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: { walletEarning: currentRoyalty, totalEarning: currentRoyalty } });
+    await User.findByIdAndUpdate(userId, { $set: { walletRoyalty: currentRoyalty }, $inc: {walletEarning: currentRoyalty, totalEarning: currentRoyalty } });
     return { message: "New month royalty credited", added: currentRoyalty };
   }
 
