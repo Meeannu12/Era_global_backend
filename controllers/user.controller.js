@@ -337,7 +337,7 @@ const getTeamIncomFindByUser = async (req, res) => {
 
     await calculateAndCreditRoyalty(user._id, directIncome, teamIncome)
 
-    
+
 
     res.status(201).json({
       success: true,
@@ -373,7 +373,7 @@ const addTaskClaim = async (req, res) => {
     }
 
     newUser.setClaimTime = setClaimTime;
-    newUser.walletClaim += 0.22;
+    newUser.walletClaim += 0.33;
 
     await newUser.save();
     res
