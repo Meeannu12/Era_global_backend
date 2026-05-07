@@ -12,18 +12,23 @@ async function distributeCommission(userID, level = 1, maxLevel = 10) {
   const referrals = await User.find({ referredBy: userID.sponsorID });
 
   for (const ref of referrals) {
-    if (ref.walletDeposit >= 11) {
-      const baseCommission = (ref.walletDeposit * 0.25) / 100;
-      const levelPercent = levels[level - 1] || 0;
-      const income = (baseCommission * levelPercent) / 100;
+    // if (ref.walletDeposit >= 11) {
 
-      commissionRecords.push({
-        userId: userID._id,
-        fromUserId: ref._id,
-        level: level,
-        amount: income,
-      });
+    // Stop entire branch if deposit < 11
+    if (ref.walletDeposit < 11) {
+      continue;
     }
+    const baseCommission = (ref.walletDeposit * 0.25) / 100;
+    const levelPercent = levels[level - 1] || 0;
+    const income = (baseCommission * levelPercent) / 100;
+
+    commissionRecords.push({
+      userId: userID._id,
+      fromUserId: ref._id,
+      level: level,
+      amount: income,
+    });
+    // }
 
     await distributeCommission(ref, level + 1, maxLevel);
   }
@@ -83,13 +88,19 @@ async function levelTeamIncome() {
   // Start commission calculation for all users (or a specific user)
   const users = await User.find(); // all users
   for (const user of users) {
-    await distributeCommission(user);
+    if (user.walletDeposit >= 11) {
+      // console.log('userid', user.sponsorID)
+      await distributeCommission(user);
+    }
   }
 
   await saveAllIncomes();
 
   console.log("Commission calculation finished!");
 }
+
+
+console.log(levelTeamIncome())
 
 module.exports = {
   levelTeamIncome,
