@@ -100,7 +100,6 @@ async function levelTeamIncome() {
 }
 
 
-console.log(levelTeamIncome())
 
 module.exports = {
   levelTeamIncome,
